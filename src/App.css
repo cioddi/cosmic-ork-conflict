@@ -33,7 +33,7 @@
   bottom: 0;
 }
 .mapboxgl-ctrl-bottom-right, .maplibregl-ctrl-bottom-right {
-  bottom: 30vh !important;
+  bottom: 30% !important;
 }
 .mapboxgl-ctrl-attrib.mapboxgl-compact, .maplibregl-ctrl-attrib.maplibregl-compact {
   background-color: hsla(0,0%,100%,.5) !important;

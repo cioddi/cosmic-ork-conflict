@@ -43,7 +43,7 @@ export default function GameInterface() {
         position: "fixed",
         bottom: 0,
         bgcolor: "background.paper",
-        height: "30vh",
+        height: "30%",
         overflow: matchesXs ? "auto" : "none",
       }}
     >
