@@ -7,14 +7,14 @@ import { useGame } from "./GameContext";
 export const getImageSrcFromProps = (props: Omit<MiniatureOptions,"position">) => {
   switch (props.type) {
     case MiniatureType.CHARACTER:
-      return "/assets/character.png";
+      return "assets/character.png";
     case MiniatureType.ROBOT:
-      return "/assets/infantry.png";
+      return "assets/infantry.png";
     case MiniatureType.VEHICLE:
-      return "/assets/vehicle.png";
+      return "assets/vehicle.png";
     case MiniatureType.INFANTRY:
     default:
-      return "/assets/infantry.png";
+      return "assets/infantry.png";
   }
 };
 
