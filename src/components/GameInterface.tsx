@@ -84,7 +84,17 @@ export default function GameInterface() {
               key="selectedMiniatureIndicator"
               geojson={game.selectedMiniature}
               paint={{
-                "circle-radius": 25,
+            "circle-radius": [
+                    "interpolate",
+                    ["exponential", 2],
+                    ["zoom"],
+                    10,
+                    // @ts-ignore
+                    ["*", ["*",28,["get", "x", ["get", "size"]]], ["^", 2, -6]],
+                    24,
+                    // @ts-ignore
+                    ["*", ["*",28,["get", "x", ["get", "size"]]], ["^", 2, 8]],
+                ]  ,
                 "circle-opacity": 0,
                 "circle-color": "rgba(0,0,0,0)",
                 "circle-stroke-width": 4,

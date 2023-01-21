@@ -3,7 +3,7 @@ export const orcUnits: Omit<MiniatureOptions,"unitsKilled" | "damageDealt" | "ki
   {
     name: "Brog Ironfist",
     description: "A brutish orc chieftain with a fierce reputation",
-    size: { x: 15, y: 15, z: 30 },
+    size: { x: 1, y: 15, z: 30 },
     position: [0, 0],
     bearing: 0,
     speed: 3,
@@ -26,11 +26,12 @@ export const orcUnits: Omit<MiniatureOptions,"unitsKilled" | "damageDealt" | "ki
       },
     ],
     type: MiniatureType.CHARACTER,
+    image: 'assets/character_1.png'
   },
   {
     name: "Goblin Snikkitz",
     description: "A sneaky goblin with a fondness for explosives",
-    size: { x: 10, y: 10, z: 20 },
+    size: { x: 1, y: 10, z: 20 },
     position: [0, 0],
     bearing: 0,
     speed: 6,
@@ -57,7 +58,7 @@ export const orcUnits: Omit<MiniatureOptions,"unitsKilled" | "damageDealt" | "ki
   {
     name: "Orc Biker",
     description: "A hulking orc biker with a love for speed",
-    size: { x: 30, y: 30, z: 50 },
+    size: { x: 2, y: 30, z: 50 },
     position: [0, 0],
     bearing: 0,
     speed: 12,
@@ -80,6 +81,7 @@ export const orcUnits: Omit<MiniatureOptions,"unitsKilled" | "damageDealt" | "ki
       },
     ],
     type: MiniatureType.VEHICLE,
+    image: 'assets/biker_1.png'
   },
   {
     name: "Ork boss biker",
@@ -155,7 +157,7 @@ export const orcUnits: Omit<MiniatureOptions,"unitsKilled" | "damageDealt" | "ki
     description:
       "A hulking brute of an Ork, Krog is feared throughout the galaxy for his brutal tactics and utter disregard for life.",
     type: MiniatureType.CHARACTER,
-    size: { x: 1.5, y: 2, z: 1.5 },
+    size: { x: 1, y: 2, z: 1.5 },
     position: [0, 0],
     bearing: 0,
     speed: 5,

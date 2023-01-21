@@ -35,14 +35,15 @@ export interface MiniatureOptions {
   damageDealt: number;
   killCount: number;
   unitsKilled: string[];
+  image?: string;
 }
 export type MiniatureParams = Omit<MiniatureOptions,"unitsKilled" | "damageDealt" | "killCount">;
 
 export default class Miniature {
   public state: MiniatureOptions;
 
-  constructor(state: MiniatureParams) {
-    this.state = { ...state, id: uuidv4(), damageDealt:0 , unitsKilled:[], killCount:0};
+  constructor(options: MiniatureParams) {
+    this.state = { ...options, id: uuidv4(), damageDealt:0 , unitsKilled:[], killCount:0};
   }
 
   // Method to apply damage to a miniature

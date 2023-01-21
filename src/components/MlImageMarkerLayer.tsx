@@ -1,8 +1,9 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 
 import { v4 as uuidv4 } from "uuid";
 
 import { useLayer, useMap } from "@mapcomponents/react-maplibre";
+import { MapEventType, Map } from "maplibre-gl";
 
 interface MlImageMarkerLayerProps {
   /**
@@ -30,6 +31,19 @@ interface MlImageMarkerLayerProps {
    * Javascript object that is passed the addLayer command as first parameter.
    */
   options?: any;
+  /**
+   * Hover event handler that is executed whenever a geometry rendered by this component is hovered.
+   */
+  onHover?: (ev: MapEventType & unknown) => Map | void;
+  /**
+   * Click event handler that is executed whenever a geometry rendered by this component is clicked.
+   */
+  onClick?: (ev: MapEventType & unknown) => Map | void;
+  /**
+   * Leave event handler that is executed whenever a geometry rendered by this component is
+   * left/unhovered.
+   */
+  onLeave?: (ev: MapEventType & unknown) => Map | void;
 }
 
 const MlImageMarkerLayer = (props: MlImageMarkerLayerProps) => {
@@ -56,6 +70,9 @@ const MlImageMarkerLayer = (props: MlImageMarkerLayerProps) => {
         ...props.options.paint,
       },
     },
+    onHover: props.onHover,
+    onClick: props.onClick,
+    onLeave: props.onLeave,
   });
 
   const createImage = (

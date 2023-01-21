@@ -4,7 +4,7 @@
   "private": true,
   "homepage": ".",
   "dependencies": {
-    "@mapcomponents/react-maplibre": "^0.1.63",
+    "@mapcomponents/react-maplibre": "^0.1.64",
     "@mui/material": "^5.11.2",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^13.0.0",

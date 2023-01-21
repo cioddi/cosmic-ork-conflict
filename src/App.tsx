@@ -15,10 +15,10 @@ function App() {
       <MapLibreMap
         mapId="map_1"
         options={{
-          zoom: 14,
+          zoom: 15,
           style:
             "https://wms.wheregroup.com/tileserver/style/osm-fiord-color.json",
-          center: [2.3239752536248943, 48.844339364968505],
+          center: [2.3233492066262897, 48.84239878537221],
         }}
       />
       <GameDataLayers />

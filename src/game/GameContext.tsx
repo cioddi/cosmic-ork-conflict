@@ -57,7 +57,6 @@ const playerSetupAreas: GeoJSONFeature[] = [
 function getRandomPointInPolygon(
   polygonFeature: GeoJSONFeature
 ): [number, number] {
-  console.log(polygonFeature.type);
 
   const randomPoint = turf.randomPoint(1, { bbox: turf.bbox(polygonFeature) });
   return randomPoint.features?.[0]?.geometry?.coordinates as [number, number];
@@ -120,8 +119,8 @@ export function GameProvider(props: { children: React.ReactNode }) {
     console.log("setup game");
 
     selectedCharacterIds = [];
-    let player_1_units = [];
-    let player_2_units = [];
+    let player_1_units:Miniature[] = [];
+    let player_2_units:Miniature[] = [];
     for (var i = 0; i < 12; i++) {
       player_1_units.push(getRandomOrkUnit(1));
       player_2_units.push(getRandomOrkUnit(2));
@@ -147,7 +146,7 @@ export function GameProvider(props: { children: React.ReactNode }) {
       if (gameRef.current.isOver() || round > 10000) {
         window.clearInterval(intervalId);
       }
-    }, 200);
+    }, 500);
     return () => {
       gameRef.current = undefined;
       window.clearInterval(intervalId);
