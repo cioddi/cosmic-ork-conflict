@@ -1,10 +1,14 @@
 import { MlGeoJsonLayer, MlLayer, useMap } from "@mapcomponents/react-maplibre";
-import { MapLayerMouseEvent } from "maplibre-gl";
+import { amber } from "@mui/material/colors";
+import { DataDrivenPropertyValueSpecification, MapLayerMouseEvent } from "maplibre-gl";
+import { useMemo } from "react";
 import MlImageMarkerLayer from "../components/MlImageMarkerLayer";
 import { MiniatureOptions, MiniatureType } from "./classes/Miniature";
 import { useGame } from "./GameContext";
 
-export const getImageSrcFromProps = (props: Omit<MiniatureOptions,"position">) => {
+export const getImageSrcFromProps = (
+  props: Omit<MiniatureOptions, "position">
+) => {
   switch (props.type) {
     case MiniatureType.CHARACTER:
       return "assets/character.png";
@@ -21,6 +25,34 @@ export const getImageSrcFromProps = (props: Omit<MiniatureOptions,"position">) =
 export default function GameDataLayers() {
   const game = useGame();
   const mapHook = useMap({ mapId: "map_1" });
+
+  const textColorExpression = useMemo(() => {
+    if (!game?.game?.players) return "black";
+    console.log("text expression refresh");
+
+    let expression = [
+      "case",
+      ...game.game?.players.flatMap((el, idx) => {
+        return [["==", ["get", "playerId"], idx + 1], el.color];
+      }),
+      "green",
+    ];
+    return expression;
+  }, [game?.game?.players.length]);
+
+  const circleStrokeExpression = useMemo<DataDrivenPropertyValueSpecification<string> | undefined>(() => {
+    if (!game?.game?.players) return "black";
+
+    let expression = [
+      "case",
+      ...game.game?.players.flatMap((el, idx) => {
+        return [["==", ["get", "playerId"], idx + 1], el.color];
+      }),
+      "green",
+    ] as DataDrivenPropertyValueSpecification<string>;
+
+    return expression;
+  }, [game?.game?.players.length]);
 
   return (
     <>
@@ -60,15 +92,15 @@ export default function GameDataLayers() {
           geojson={game.geojson}
           paint={{
             "circle-radius": 24,
-            "circle-stroke-color": [
-              "case",
-              ["==", ["get", "playerId"], 1],
-              "green",
-              "purple",
-            ],
+            "circle-stroke-color": circleStrokeExpression,
             "circle-stroke-width": 2,
-            "circle-color": 'rgba(0,0,0,0)',
-            "circle-opacity": ["case", [">", ["get", "hitpoints"], 0], 0.4, 0.2],
+            "circle-color": "rgba(0,0,0,0)",
+            "circle-opacity": [
+              "case",
+              [">", ["get", "hitpoints"], 0],
+              0.4,
+              0.2,
+            ],
             "circle-stroke-opacity": [
               "case",
               [">", ["get", "hitpoints"], 0],
@@ -77,19 +109,21 @@ export default function GameDataLayers() {
             ],
           }}
           key="pointlayer"
-          onClick={((ev: MapLayerMouseEvent) => {
-            console.log(ev.features);
-            game.setSelectedMiniatureId(ev.features?.[0]?.properties?.id);
-          }) as unknown as MapLayerMouseEvent}
+          onClick={
+            ((ev: MapLayerMouseEvent) => {
+              console.log(ev.features);
+              game.setSelectedMiniatureId(ev.features?.[0]?.properties?.id);
+            }) as unknown as MapLayerMouseEvent
+          }
           onHover={
             (() => {
-              if(!mapHook.map)return;
+              if (!mapHook.map) return;
               mapHook.map.map.getCanvas().style.cursor = "pointer";
             }) as unknown as MapLayerMouseEvent
           }
           onLeave={
             (() => {
-              if(!mapHook.map)return;
+              if (!mapHook.map) return;
               mapHook.map.map.getCanvas().style.cursor = "";
             }) as unknown as MapLayerMouseEvent
           }
@@ -125,22 +159,12 @@ export default function GameDataLayers() {
               "text-offset": [2, 2],
             },
             paint: {
-              "text-color": [
-                "case",
-                ["==", ["get", "playerId"], 1],
-                "blue",
-                "green",
-              ],
-              "text-opacity": [
-                "case",
-                [">", ["get", "hitpoints"], 0],
-                1,
-                0,
-              ],
+              "text-color": textColorExpression,
+              "text-opacity": ["case", [">", ["get", "hitpoints"], 0], 1, 0],
               "text-halo-color": [
                 "case",
                 [">", ["get", "hitpoints"], 0],
-                "white",
+                "black",
                 "#ffafa9",
               ],
               "text-halo-width": 2,

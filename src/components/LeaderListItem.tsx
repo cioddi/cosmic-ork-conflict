@@ -27,7 +27,14 @@ export default function FolderList(props: {
       }}
     >
       <ListItemAvatar>
-        <Avatar>
+        <Avatar
+          sx={{
+            border:
+              "2px solid " +
+              game?.game?.players[props.miniature.properties.playerId - 1]
+                .color,
+          }}
+        >
           <img
             src={getImageSrcFromProps(props.miniature.properties)}
             alt={props.miniature.properties.description}
@@ -37,10 +44,10 @@ export default function FolderList(props: {
       <ListItemText
         primary={props.miniature.properties.name}
         primaryTypographyProps={{
-          color: 
-          game?.selectedMiniatureId === props.miniature.properties.id
-            ? "primary.contrastText"
-            : "primary.main",
+          color:
+            game?.selectedMiniatureId === props.miniature.properties.id
+              ? "primary.contrastText"
+              : "primary.main",
         }}
         secondary={
           "Kills: " +

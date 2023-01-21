@@ -1,3 +1,4 @@
+import { CSSProperties } from "react";
 import Game from "./Game";
 import Miniature from "./Miniature";
 import { PlayerInterface } from "./Player";
@@ -7,11 +8,13 @@ export default class SequentialAI implements PlayerInterface {
   name: string;
   miniatures: Miniature[];
   actionIndex: number;
+  color: CSSProperties['color'];
 
-  constructor(id: number, name: string, miniatures: Miniature[]) {
+  constructor(id: number, name: string, miniatures: Miniature[], color: CSSProperties['color']) {
     this.id = id;
     this.name = name;
     this.miniatures = miniatures;
+    this.color = color;
     this.actionIndex = 0;
   }
 

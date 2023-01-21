@@ -127,8 +127,8 @@ export function GameProvider(props: { children: React.ReactNode }) {
       player_2_units.push(getRandomOrkUnit(2));
     }
     const players = [
-      new SequentialAI(1, "Player 1", player_1_units),
-      new SequentialAI(2, "Player 2", player_2_units),
+      new SequentialAI(1, "Player 1", player_1_units, "red"),
+      new SequentialAI(2, "Player 2", player_2_units, "yellow"),
     ];
     gameRef.current = new Game(players);
     setGame(gameRef.current);
