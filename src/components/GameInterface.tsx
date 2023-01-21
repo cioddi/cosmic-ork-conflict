@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Box,
   Checkbox,
@@ -44,6 +44,12 @@ export default function GameInterface() {
     });
   }, [game, hideTheDead]);
 
+  useEffect(() => {
+    if(!game?.selectedMiniatureId)return;
+
+    setSelectedView('selected');
+  },[game?.selectedMiniatureId])
+
   return (
     <>
       {matchesXs && (
@@ -59,9 +65,11 @@ export default function GameInterface() {
             <ToggleButton value="units" aria-label="left aligned">
               <FormatListBulletedIcon />
             </ToggleButton>
-            <ToggleButton value="selected" aria-label="centered">
-              <SmartToyIcon />
-            </ToggleButton>
+            {game?.selectedMiniature && 
+              <ToggleButton value="selected" aria-label="centered">
+                <SmartToyIcon />
+              </ToggleButton>
+            }
             <ToggleButton value="game" aria-label="right aligned">
               <CasinoIcon />
             </ToggleButton>
@@ -115,9 +123,8 @@ export default function GameInterface() {
           sm={4}
           xs={12}
           sx={{
-            display: "flex",
             ...(matchesXs
-              ? { display: selectedView === "selected" ? "flex" : "none" }
+              ? { display: selectedView === "selected" ? "block" : "none" }
               : {}),
             flexDirection: 'column',
             height: "100%",
