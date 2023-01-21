@@ -34,6 +34,7 @@
 }
 .mapboxgl-ctrl-bottom-right, .maplibregl-ctrl-bottom-right {
   bottom: 30% !important;
+  position: fixed !important;
 }
 .mapboxgl-ctrl-attrib.mapboxgl-compact, .maplibregl-ctrl-attrib.maplibregl-compact {
   background-color: hsla(0,0%,100%,.5) !important;
