@@ -176,7 +176,7 @@ export default function GameDataLayers() {
                 " hitpoints)",
               ],
               "text-font": ["Metropolis Regular"],
-              "text-ignore-placement": false,
+              "text-ignore-placement": true,
               "text-variable-anchor": [
                 "left",
                 "right",

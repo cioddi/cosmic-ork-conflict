@@ -9,12 +9,14 @@ import Paper from "@mui/material/Paper";
 import { useGame } from "../game/GameContext";
 import Player from "../game/classes/Player";
 import { GameStateFeatureCollectionType } from "../game/classes/Game";
+import { Avatar } from "@mui/material";
 
 interface PlayerStatsType {
   id: number;
   livingUnitCount: number;
   killCount: number;
   damageDealt: number;
+  player: Player;
 }
 function getPlayerStats(
   player: Player,
@@ -36,6 +38,7 @@ function getPlayerStats(
     livingUnitCount: livingUnits.length,
     killCount: killCount,
     damageDealt: damageDealt,
+    player,
   };
 }
 
@@ -79,7 +82,7 @@ export default function GameStatsTable() {
               sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
             >
               <TableCell component="th" scope="row">
-                round
+                turn
               </TableCell>
 
               <TableCell align="right">{stats.round}</TableCell>
@@ -104,11 +107,36 @@ export default function GameStatsTable() {
           <TableBody>
             {stats.players.map((el, idx) => [
               <TableRow
+                key={"title_row" + idx}
+                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+              >
+                <TableCell
+                  scope="row"
+                  sx={{ display: "flex", alignItems: "center", padding:'5px 16px' }}
+                >
+                  <Avatar
+                    sx={{
+                      width: "10px",
+                      height: "10px",
+                      backgroundColor: el.player.color,
+                      marginRight: "5px",
+                    }}
+                  >
+                    &nbsp;
+                  </Avatar>
+                  <strong>Player {el.id}</strong>
+                </TableCell>
+
+                <TableCell 
+                  sx={{ padding:'5px 16px' }}
+                align="right">&nbsp;</TableCell>
+              </TableRow>,
+              <TableRow
                 key={"kills_row" + idx}
                 sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
               >
-                <TableCell component="th" scope="row">
-                  <strong>Player {el.id}</strong>&nbsp; kills
+                <TableCell scope="row">
+                  kills
                 </TableCell>
 
                 <TableCell align="right">{el.killCount}</TableCell>
@@ -117,7 +145,7 @@ export default function GameStatsTable() {
                 key={"units_row" + idx}
                 sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
               >
-                <TableCell component="th" scope="row">
+                <TableCell scope="row">
                   units left
                 </TableCell>
 
@@ -127,7 +155,7 @@ export default function GameStatsTable() {
                 key={"damage_row" + idx}
                 sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
               >
-                <TableCell component="th" scope="row">
+                <TableCell scope="row">
                   total damage
                 </TableCell>
 

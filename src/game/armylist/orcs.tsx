@@ -15,13 +15,13 @@ export const orcUnits: Omit<MiniatureOptions,"unitsKilled" | "damageDealt" | "ki
       {
         name: "Great Maul",
         description: "A massive two-handed hammer",
-        damage: 4,
+        damage: 5,
         range: 1,
       },
       {
         name: "Brass Knuckles",
         description: "A pair of brass knuckles",
-        damage: 2,
+        damage: 4,
         range: 0,
       },
     ],
@@ -61,7 +61,7 @@ export const orcUnits: Omit<MiniatureOptions,"unitsKilled" | "damageDealt" | "ki
     size: { x: 2, y: 30, z: 50 },
     position: [0, 0],
     bearing: 0,
-    speed: 12,
+    speed: 16,
     hitpoints: 12,
     armour: 2,
     meleeAttack: 3,
@@ -70,7 +70,7 @@ export const orcUnits: Omit<MiniatureOptions,"unitsKilled" | "damageDealt" | "ki
       {
         name: "Chainsaw",
         description: "A loud and vicious chainsaw",
-        damage: 5,
+        damage: 4,
         range: 1,
       },
       {
@@ -91,7 +91,7 @@ export const orcUnits: Omit<MiniatureOptions,"unitsKilled" | "damageDealt" | "ki
     size: { x: 2, y: 2, z: 3 },
     position: [0, 0],
     bearing: 0,
-    speed: 14,
+    speed: 16,
     meleeAttack: 5,
     rangeAttack: 0,
     armour: 3,
@@ -101,7 +101,7 @@ export const orcUnits: Omit<MiniatureOptions,"unitsKilled" | "damageDealt" | "ki
         name: "Power Klaw",
         description:
           "A massive, powered claw that can tear through even the toughest armor.",
-        damage: 8,
+        damage: 5,
         range: 0,
       },
     ],
@@ -114,11 +114,11 @@ export const orcUnits: Omit<MiniatureOptions,"unitsKilled" | "damageDealt" | "ki
     size: { x: 2, y: 2, z: 3 },
     position: [0, 0],
     bearing: 0,
-    speed: 20,
+    speed: 15,
     meleeAttack: 3,
     rangeAttack: 3,
-    armour: 3,
-    hitpoints: 8,
+    armour: 4,
+    hitpoints: 18,
     weapons: [
       {
         name: "Snazgun",

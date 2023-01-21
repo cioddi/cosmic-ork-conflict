@@ -18,8 +18,17 @@ export default function SelectedMiniatureCard(props: {
     <Card sx={{ width: "100%" }}>
       <CardHeader
         avatar={
-          <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
+          <Avatar
+            sx={{
+              bgcolor: red[500],
+              width: "60px",
+              height: "60px",
+              backgroundColor: "grey.main",
+            }}
+            aria-label="recipe"
+          >
             <img
+              style={{ width: "100%" }}
               src={getImageSrcFromProps(props.miniature.properties)}
               alt={props.miniature.properties.description}
             />
