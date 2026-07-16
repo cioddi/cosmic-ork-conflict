@@ -1,13 +1,12 @@
 import { MlGeoJsonLayer, MlLayer, useMap } from "@mapcomponents/react-maplibre";
-import { amber } from "@mui/material/colors";
-import {
-  DataDrivenPropertyValueSpecification,
-  MapLayerMouseEvent,
-} from "maplibre-gl";
-import { useMemo } from "react";
-import MlImageMarkerLayer from "../components/MlImageMarkerLayer";
+import { DataDrivenPropertyValueSpecification } from "maplibre-gl";
+import { useEffect, useMemo, useState } from "react";
 import { MiniatureOptions, MiniatureType } from "./classes/Miniature";
 import { useGame } from "./GameContext";
+import { useAnimatedGameGeoJSON } from "./view/useAnimatedGameGeoJSON";
+import SharedUnitIconLayer from "./view/SharedUnitIconLayer";
+
+const GAME_UNITS_SOURCE_ID = "game-units";
 
 export const getImageSrcFromProps = (
   props: Omit<MiniatureOptions, "position">
@@ -30,113 +29,106 @@ export const getImageSrcFromProps = (
 export default function GameDataLayers() {
   const game = useGame();
   const mapHook = useMap({ mapId: "map_1" });
+  const [iconsReady, setIconsReady] = useState(false);
+  const renderedGeojson = useAnimatedGameGeoJSON(
+    game?.snapshot,
+    game?.game?.world.projection,
+    520
+  );
+  const viewCanRender = Boolean(iconsReady && renderedGeojson);
+  const setViewReady = game?.setViewReady;
+  const players = game?.game?.players;
+  const selectedRenderedMiniature = useMemo(
+    () =>
+      game?.selectedMiniatureId
+        ? renderedGeojson?.features.find(
+            (feature) => feature.properties.id === game.selectedMiniatureId
+          )
+        : undefined,
+    [renderedGeojson, game?.selectedMiniatureId]
+  );
+
+  useEffect(() => {
+    if (!setViewReady) return;
+    if (!viewCanRender) {
+      setViewReady(false);
+      return;
+    }
+    let firstFrame: number | undefined;
+    let secondFrame: number | undefined;
+    firstFrame = requestAnimationFrame(() => {
+      secondFrame = requestAnimationFrame(() => setViewReady(true));
+    });
+    return () => {
+      if (firstFrame !== undefined) cancelAnimationFrame(firstFrame);
+      if (secondFrame !== undefined) cancelAnimationFrame(secondFrame);
+      setViewReady(false);
+    };
+  }, [setViewReady, viewCanRender]);
 
   const textColorExpression = useMemo(() => {
-    if (!game?.game?.players) return "black";
+    if (!players) return "black";
 
     let expression = [
       "case",
-      ...game.game?.players.flatMap((el, idx) => {
+      ...players.flatMap((el, idx) => {
         return [["==", ["get", "playerId"], idx + 1], el.color];
       }),
       "green",
     ];
     return expression;
-  }, [game?.game?.players.length]);
+  }, [players]);
 
   const circleStrokeExpression = useMemo<
     DataDrivenPropertyValueSpecification<string> | undefined
   >(() => {
-    if (!game?.game?.players) return "black";
+    if (!players) return "black";
 
     let expression = [
       "case",
-      ...game.game?.players.flatMap((el, idx) => {
+      ...players.flatMap((el, idx) => {
         return [["==", ["get", "playerId"], idx + 1], el.color];
       }),
       "green",
     ] as DataDrivenPropertyValueSpecification<string>;
 
     return expression;
-  }, [game?.game?.players.length]);
+  }, [players]);
 
   return (
     <>
-      {game?.geojson?.features?.map((el: any, idx: number) => {
-        const _el = el;
-        return (
-            <MlImageMarkerLayer
-              layerId={'layer' + _el.properties.type + idx}
-              imageId={'image' + _el.properties.type + idx}
-              options={{
-                type: "symbol",
-                source: {
-                  type: "geojson",
-                  data: el,
-                },
-                layout: {
-                  "icon-allow-overlap": true,
-                  "icon-size": [
-                    "interpolate",
-                    ["exponential", 2],
-                    ["zoom"],
-                    10,
-                    ["^", 2, -6],
-                    24,
-                    ["^", 2, 8],
-                  ],
-                },
-                paint: {
-                  "icon-opacity": [
-                    "case",
-                    [">", ["get", "hitpoints"], 0],
-                    1,
-                    0.2,
-                  ],
-                  "icon-halo-color": "red",
-                  "icon-halo-width": 4,
-                },
-              }}
-              imgSrc={getImageSrcFromProps(_el.properties)}
-              key={"iconlayer_" + idx}
-          onClick={
-            ((ev) => {
-              console.log(_el.properties);
-              
-              game.setSelectedMiniatureId(_el.properties.id);
-            })
-          }
-          onHover={
-            (() => {
-              if (!mapHook.map) return;
-
-              let canvasParent = mapHook.map.map.getCanvas().parentElement;
-              if (canvasParent) {
-                canvasParent.style.cursor = "pointer";
-              }
-            })
-          }
-          onLeave={
-            (() => {
-              if (!mapHook.map) return;
-              
-              let canvasParent = mapHook.map.map.getCanvas().parentElement;
-              if (canvasParent) {
-                canvasParent.style.cursor = "";
-              }
-            })
-          }
-            />
-        );
-      })}
-      {game?.geojson && (
+      {viewCanRender && selectedRenderedMiniature && (
         <MlGeoJsonLayer
-          geojson={game.geojson}
+          layerId="selected-miniature-indicator"
+          geojson={selectedRenderedMiniature}
           paint={{
             "circle-radius": [
-                    "interpolate",
-                    ["exponential", 2],
-                    ["zoom"],
+              "interpolate",
+              ["exponential", 2],
+              ["zoom"],
+              10,
+              // @ts-ignore
+              ["*", ["*", 28, ["get", "x", ["get", "size"]]], ["^", 2, -6]],
+              24,
+              // @ts-ignore
+              ["*", ["*", 28, ["get", "x", ["get", "size"]]], ["^", 2, 8]],
+            ],
+            "circle-opacity": 0,
+            "circle-color": "rgba(0,0,0,0)",
+            "circle-stroke-width": 4,
+            "circle-stroke-color": "#b4ddff",
+          }}
+        />
+      )}
+      {viewCanRender && renderedGeojson && (
+        <MlGeoJsonLayer
+          layerId={GAME_UNITS_SOURCE_ID}
+          geojson={renderedGeojson}
+          paint={{
+            "circle-radius": [
+              "interpolate",
+              ["exponential", 2],
+              ["zoom"],
               0,
               0,
               24,
@@ -158,15 +150,33 @@ export default function GameDataLayers() {
               0.8,
               0.2,
             ],
-
           }}
           key="circlelayer"
+          onClick={(event: any) => {
+            const id = event.features?.[0]?.properties?.id;
+            if (id) game?.setSelectedMiniatureId(id);
+          }}
+          onHover={() => {
+            const parent = mapHook.map?.map.getCanvas().parentElement;
+            if (parent) parent.style.cursor = "pointer";
+          }}
+          onLeave={() => {
+            const parent = mapHook.map?.map.getCanvas().parentElement;
+            if (parent) parent.style.cursor = "";
+          }}
         />
       )}
-      {game?.geojson && (
+      <SharedUnitIconLayer
+        sourceId={GAME_UNITS_SOURCE_ID}
+        enabled={viewCanRender}
+        onReady={setIconsReady}
+      />
+      {viewCanRender && renderedGeojson && (
         <MlLayer
+          layerId="game-unit-labels"
           options={{
             type: "symbol",
+            source: GAME_UNITS_SOURCE_ID,
             layout: {
               "text-field": [
                 "concat",
@@ -176,7 +186,15 @@ export default function GameDataLayers() {
                 " hitpoints)",
               ],
               "text-font": ["Metropolis Regular"],
-              "text-ignore-placement": true,
+              "text-allow-overlap": false,
+              "text-ignore-placement": false,
+              "text-optional": true,
+              "text-padding": 4,
+              "symbol-sort-key": [
+                "-",
+                0,
+                ["coalesce", ["get", "killCount"], 0],
+              ],
               "text-variable-anchor": [
                 "left",
                 "right",
@@ -204,7 +222,6 @@ export default function GameDataLayers() {
               "text-halo-width": 2,
             },
           }}
-          geojson={game.geojson}
           key={"labels"}
         />
       )}

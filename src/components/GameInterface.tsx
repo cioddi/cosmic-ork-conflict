@@ -11,8 +11,7 @@ import {
 } from "@mui/material";
 import { useGame } from "../game/GameContext";
 import LeaderListItem from "./LeaderListItem";
-import { MiniatureGeoJsonFeature } from "../game/classes/Game";
-import { MlGeoJsonLayer } from "@mapcomponents/react-maplibre";
+import { MiniatureGeoJsonFeature } from "../game/view/MapLibreSnapshotAdapter";
 import SelectedMiniatureCard from "./SelectedMiniatureCard";
 import SelectedMiniatureStatsTable from "./SelectedMiniatureStatsTable";
 import GameStatsTable from "./GameStatsTable";
@@ -138,27 +137,6 @@ export default function GameInterface() {
                 miniature={game.selectedMiniature}
               />
               <SelectedMiniatureStatsTable miniature={game.selectedMiniature} />
-              <MlGeoJsonLayer
-                key="selectedMiniatureIndicator"
-                geojson={game.selectedMiniature}
-                paint={{
-                  "circle-radius": [
-                    "interpolate",
-                    ["exponential", 2],
-                    ["zoom"],
-                    10,
-                    // @ts-ignore
-                    [ "*", ["*", 28, ["get", "x", ["get", "size"]]], ["^", 2, -6] ],
-                    24,
-                    // @ts-ignore
-                    [ "*", ["*", 28, ["get", "x", ["get", "size"]]], ["^", 2, 8] ],
-                  ],
-                  "circle-opacity": 0,
-                  "circle-color": "rgba(0,0,0,0)",
-                  "circle-stroke-width": 4,
-                  "circle-stroke-color": "#b4ddff",
-                }}
-              />
             </>
           )}
         </Grid>

@@ -4,7 +4,7 @@ import ListItemText from "@mui/material/ListItemText";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Avatar from "@mui/material/Avatar";
 import { getImageSrcFromProps } from "../game/GameDataLayers";
-import { MiniatureGeoJsonFeature } from "../game/classes/Game";
+import { MiniatureGeoJsonFeature } from "../game/view/MapLibreSnapshotAdapter";
 import { useGame } from "../game/GameContext";
 
 import LinearProgress, {

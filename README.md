@@ -48,6 +48,30 @@ GameInterface <-- GameContext: receives
 
 If you want to contribute to the development of Cosmic Ork Conflict, you can fork this repository and make your changes. Once you are satisfied with your changes, you can submit a pull request for review.
 
+### Game world architecture
+
+The simulation loads and decodes its own vector tiles and builds an immutable,
+renderer-neutral world model before a game begins. MapLibre consumes snapshots
+from the engine and is not a source of collision or navigation state.
+
+The architecture, collision guarantees, animation contract, test strategy, and
+safe adjustment points are documented in
+[`GAME_WORLD_NAVIGATION_PLAN.md`](GAME_WORLD_NAVIGATION_PLAN.md).
+
+Useful verification commands:
+
+```sh
+npm run typecheck
+npm run test:ci
+```
+
+The production build script publishes into `docs/`. To compile without replacing
+the published site during local verification, run:
+
+```sh
+./node_modules/.bin/react-scripts build
+```
+
 ## License
 
 Cosmic Ork Conflict is licensed under the MIT License.

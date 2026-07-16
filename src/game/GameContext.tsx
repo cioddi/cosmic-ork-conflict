@@ -1,166 +1,210 @@
-import { createContext, useContext, useMemo, useRef } from "react";
-import { useState, useEffect } from "react";
-import Game, {
-  GameStateFeatureCollectionType,
-  MiniatureGeoJsonFeature,
-} from "./classes/Game";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import Game, { GameSnapshot } from "./classes/Game";
 import SequentialAI from "./classes/SequentialAI";
 import Miniature, { MiniatureType } from "./classes/Miniature";
 import { orcUnits } from "./armylist/orcs";
-import * as turf from "@turf/turf";
-import { GeoJSONFeature, LngLatLike } from "maplibre-gl";
-import { useMap } from "@mapcomponents/react-maplibre";
+import { GridNavigation } from "./navigation/GridNavigation";
+import {
+  VectorTileWorldLoader,
+  createSeededRandom,
+  findSpawnPoint,
+} from "./world";
+import { PARIS_WORLD_DEFINITION } from "./world/worlds/paris";
+import {
+  GameStateFeatureCollectionType,
+  MiniatureGeoJsonFeature,
+  gameSnapshotToGeoJSON,
+} from "./view/MapLibreSnapshotAdapter";
 
-const GameContext = createContext<{
+export type GameLoadStatus =
+  | "loading-world"
+  | "creating-game"
+  | "preparing-view"
+  | "running"
+  | "finished"
+  | "error";
+
+interface GameContextValue {
   game: Game | null;
+  snapshot: GameSnapshot | undefined;
   geojson: GameStateFeatureCollectionType | undefined;
   selectedMiniature: MiniatureGeoJsonFeature | undefined;
   selectedMiniatureId: string | undefined;
   setSelectedMiniatureId: (id: string | undefined) => void;
-} | null>(null);
-
-const playerSetupAreas: GeoJSONFeature[] = [
-  {
-    type: "Feature",
-    properties: {},
-    geometry: {
-      coordinates: [
-        [
-          [2.3100715332713833, 48.85097657043505],
-          [2.328249799962066, 48.85365591032402],
-          [2.3309401834327446, 48.8503067130581],
-          [2.310289672471839, 48.846957291748225],
-          [2.3100715332713833, 48.85097657043505],
-        ],
-      ],
-      type: "Polygon",
-    },
-  },
-  {
-    type: "Feature",
-    properties: {},
-    geometry: {
-      coordinates: [
-        [
-          [2.3163248570122335, 48.83690728604532],
-          [2.3378479247763266, 48.840256647415714],
-          [2.3388659077103, 48.83662030670902],
-          [2.3182153967493946, 48.833270885399145],
-          [2.3163248570122335, 48.83690728604532],
-        ],
-      ],
-      type: "Polygon",
-    },
-  },
-] as GeoJSONFeature[];
-
-function getRandomPointInPolygon(
-  polygonFeature: GeoJSONFeature
-): [number, number] {
-
-  const randomPoint = turf.randomPoint(1, { bbox: turf.bbox(polygonFeature) });
-  return randomPoint.features?.[0]?.geometry?.coordinates as [number, number];
+  setViewReady: (ready: boolean) => void;
+  status: GameLoadStatus;
+  error: string | undefined;
 }
+
+const GameContext = createContext<GameContextValue | null>(null);
+const UNITS_PER_PLAYER = 12;
+const TICK_INTERVAL_MS = 650;
 
 let selectedCharacterIds: number[] = [];
-function getRandomOrkUnitId() {
-  return Math.floor(Math.random() * orcUnits.length);
+let parisWorldPromise: Promise<Game["world"]> | undefined;
+
+function loadParisWorld(): Promise<Game["world"]> {
+  if (!parisWorldPromise) {
+    parisWorldPromise = new VectorTileWorldLoader()
+      .load(PARIS_WORLD_DEFINITION)
+      .catch((error) => {
+        parisWorldPromise = undefined;
+        throw error;
+      });
+  }
+  return parisWorldPromise;
 }
-function getRandomOrkUnit(playerId: number) {
-  let unitId = getRandomOrkUnitId();
+
+function getRandomOrkUnitId(random: () => number): number {
+  return Math.floor(random() * orcUnits.length);
+}
+
+function createRandomUnit(
+  playerIndex: number,
+  world: Game["world"],
+  navigation: GridNavigation,
+  random: () => number
+): Miniature {
+  let unitId = getRandomOrkUnitId(random);
   while (
     MiniatureType[orcUnits[unitId].type] === "CHARACTER" &&
-    selectedCharacterIds.indexOf(unitId) !== -1
+    selectedCharacterIds.includes(unitId)
   ) {
-    unitId = getRandomOrkUnitId();
+    unitId = getRandomOrkUnitId(random);
   }
   if (MiniatureType[orcUnits[unitId].type] === "CHARACTER") {
-    console.log("character chosen");
-
     selectedCharacterIds.push(unitId);
   }
+  const template = orcUnits[unitId];
+  const mobilityProfileId =
+    template.type === MiniatureType.VEHICLE ? "vehicle" : "infantry";
   return new Miniature({
-    ...orcUnits[unitId],
-    position: getRandomPointInPolygon(playerSetupAreas[playerId - 1]),
+    ...template,
+    mobilityProfileId,
+    position: findSpawnPoint(
+      world,
+      playerIndex,
+      mobilityProfileId,
+      random,
+      400,
+      (point) => navigation.isInMainNavigableArea(point, mobilityProfileId)
+    ),
   });
 }
-export function GameProvider(props: { children: React.ReactNode }) {
-  const gameRef = useRef<Game | undefined>();
-  const selectedMiniatureIdRef = useRef<string | undefined>();
-  const mapHook = useMap({ mapId: "map_1" });
+
+export interface GameProviderProps {
+  children: React.ReactNode;
+  loadWorld?: () => Promise<Game["world"]>;
+}
+
+export function GameProvider(props: GameProviderProps) {
+  const simulationFinishedRef = useRef(false);
   const [game, setGame] = useState<Game | null>(null);
-  const [geojson, setGeojson] = useState<
-    GameStateFeatureCollectionType | undefined
-  >();
-  const [selectedMiniatureId, setSelectedMiniatureId] = useState<
-    string | undefined
-  >();
+  const [snapshot, setSnapshot] = useState<GameSnapshot>();
+  const [selectedMiniatureId, setSelectedMiniatureId] = useState<string>();
+  const [viewReady, setViewReady] = useState(false);
+  const [status, setStatus] = useState<GameLoadStatus>("loading-world");
+  const [error, setError] = useState<string>();
 
-  const selectedMiniature = useMemo<MiniatureGeoJsonFeature | undefined>(() => {
-    if (!selectedMiniatureId || !geojson?.features) return;
-
-    let _selectedMini = geojson.features.filter((el) => {
-      return el.properties.id === selectedMiniatureId;
-    });
-
-    if (selectedMiniatureId !== selectedMiniatureIdRef.current) {
-      selectedMiniatureIdRef.current = selectedMiniatureId;
-      if (mapHook.map) {
-        mapHook.map.map.easeTo({
-          center: _selectedMini[0].geometry.coordinates as LngLatLike,
-          zoom: 16,
-        });
-      }
-    }
-    return _selectedMini?.[0];
-  }, [geojson, selectedMiniatureId, mapHook]);
+  const geojson = useMemo(
+    () =>
+      snapshot && game
+        ? gameSnapshotToGeoJSON(snapshot, game.world.projection)
+        : undefined,
+    [snapshot, game]
+  );
+  const selectedMiniature = useMemo(
+    () =>
+      selectedMiniatureId
+        ? geojson?.features.find(
+            (feature) => feature.properties.id === selectedMiniatureId
+          )
+        : undefined,
+    [geojson, selectedMiniatureId]
+  );
 
   useEffect(() => {
-    console.log("setup game");
+    let cancelled = false;
 
-    selectedCharacterIds = [];
-    let player_1_units:Miniature[] = [];
-    let player_2_units:Miniature[] = [];
-    for (var i = 0; i < 12; i++) {
-      player_1_units.push(getRandomOrkUnit(1));
-      player_2_units.push(getRandomOrkUnit(2));
-    }
-    const players = [
-      new SequentialAI(1, "Player 1", player_1_units, "red"),
-      new SequentialAI(2, "Player 2", player_2_units, "yellow"),
-    ];
-    gameRef.current = new Game(players);
-    setGame(gameRef.current);
-
-    let round = 0;
-    // Play the game until it is over
-
-    let intervalId = window.setInterval(() => {
-      if (!gameRef.current) return;
-      round++;
-
-      players[0].playRound(gameRef.current);
-      players[1].playRound(gameRef.current);
-      setGeojson(gameRef.current.getGameStateAsGeoJSON());
-
-      if (gameRef.current.isOver() || round > 10000) {
-        window.clearInterval(intervalId);
+    const initialize = async () => {
+      try {
+        setStatus("loading-world");
+        const world = await (props.loadWorld ?? loadParisWorld)();
+        if (cancelled) return;
+        setStatus("creating-game");
+        const navigation = new GridNavigation(world);
+        navigation.initialize();
+        const random = createSeededRandom(0xc05c1c);
+        selectedCharacterIds = [];
+        const player1Units: Miniature[] = [];
+        const player2Units: Miniature[] = [];
+        for (let index = 0; index < UNITS_PER_PLAYER; index++) {
+          player1Units.push(createRandomUnit(0, world, navigation, random));
+          player2Units.push(createRandomUnit(1, world, navigation, random));
+        }
+        const players = [
+          new SequentialAI(1, "Player 1", player1Units, "red"),
+          new SequentialAI(2, "Player 2", player2Units, "yellow"),
+        ];
+        const nextGame = new Game(players, world, navigation, random);
+        simulationFinishedRef.current = false;
+        setGame(nextGame);
+        setSnapshot(nextGame.getSnapshot());
+        setStatus("preparing-view");
+      } catch (caught) {
+        if (cancelled) return;
+        setError(caught instanceof Error ? caught.message : String(caught));
+        setStatus("error");
       }
-    }, 500);
-    return () => {
-      gameRef.current = undefined;
-      window.clearInterval(intervalId);
     };
-  }, []);
+
+    initialize();
+    return () => {
+      cancelled = true;
+    };
+  }, [props.loadWorld]);
+
+  useEffect(() => {
+    if (!game || !viewReady || simulationFinishedRef.current) return;
+    setStatus("running");
+    let timeoutId: number | undefined;
+    const runTurn = () => {
+      game.beginStep();
+      const currentPlayer = game.players[game.currentPlayer];
+      currentPlayer.playRound?.(game);
+      setSnapshot(game.getSnapshot());
+      if (game.isOver() || game.round > 10000) {
+        simulationFinishedRef.current = true;
+        setStatus("finished");
+        return;
+      }
+      timeoutId = window.setTimeout(runTurn, TICK_INTERVAL_MS);
+    };
+    timeoutId = window.setTimeout(runTurn, TICK_INTERVAL_MS);
+    return () => {
+      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+    };
+  }, [game, viewReady]);
 
   return (
     <GameContext.Provider
       value={{
         game,
+        snapshot,
         geojson,
         selectedMiniature,
         selectedMiniatureId,
         setSelectedMiniatureId,
+        setViewReady,
+        status,
+        error,
       }}
     >
       {props.children}
@@ -168,7 +212,6 @@ export function GameProvider(props: { children: React.ReactNode }) {
   );
 }
 
-export function useGame() {
-  const game = useContext(GameContext);
-  return game;
+export function useGame(): GameContextValue | null {
+  return useContext(GameContext);
 }

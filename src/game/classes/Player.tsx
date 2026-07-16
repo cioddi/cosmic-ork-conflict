@@ -16,7 +16,7 @@ export interface PlayerInterface {
   ) => "move" | "melee" | "range";
   // A function that determines the movement path for a given miniature
   findNearest?: (miniature: Miniature, enemies: Miniature[]) => Miniature;
-  playRound?: (game: Game, miniature: Miniature) => void;
+  playRound?: (game: Game) => void;
   color: CSSProperties['color'];
 }
 

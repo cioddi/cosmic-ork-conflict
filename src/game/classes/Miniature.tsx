@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
+import { WorldPoint } from "../world";
 
 export enum MiniatureType {
   // A unique individual or hero.
@@ -24,7 +25,9 @@ export interface MiniatureOptions {
   description: string;
   type: MiniatureType;
   size: { x: number; y: number; z: number };
-  position: [number, number];
+  /** Authoritative position in the GameWorld's local meter coordinate system. */
+  position: WorldPoint;
+  mobilityProfileId?: string;
   bearing: number;
   speed: number;
   meleeAttack: number;
@@ -44,7 +47,18 @@ export default class Miniature {
   public state: MiniatureOptions;
 
   constructor(options: MiniatureParams) {
-    this.state = { ...options, id: uuidv4(), damageDealt:0 , unitsKilled:[], killCount:0, initialHitpoints: options.hitpoints};
+    this.state = {
+      ...options,
+      position: [...options.position],
+      mobilityProfileId:
+        options.mobilityProfileId ??
+        (options.type === MiniatureType.VEHICLE ? "vehicle" : "infantry"),
+      id: uuidv4(),
+      damageDealt: 0,
+      unitsKilled: [],
+      killCount: 0,
+      initialHitpoints: options.hitpoints,
+    };
   }
 
   // Method to apply damage to a miniature

@@ -6,7 +6,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { MiniatureGeoJsonFeature } from "../game/classes/Game";
+import { MiniatureGeoJsonFeature } from "../game/view/MapLibreSnapshotAdapter";
 
 export default function SelectedMiniatureStatsTable(props: {
   miniature: MiniatureGeoJsonFeature;

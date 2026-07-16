@@ -4,29 +4,39 @@
   "private": true,
   "homepage": ".",
   "dependencies": {
+    "@deck.gl/core": "^8.9.36",
+    "@deck.gl/layers": "^8.9.36",
+    "@deck.gl/mapbox": "^8.9.36",
+    "@mapbox/vector-tile": "^1.3.1",
     "@mapcomponents/react-maplibre": "^0.1.64",
     "@mui/material": "^5.11.2",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^13.0.0",
     "@testing-library/user-event": "^13.2.1",
     "@types/jest": "^27.0.1",
+    "@types/mapbox__vector-tile": "^1.3.2",
     "@types/node": "^16.7.13",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "@types/uuid": "^9.0.0",
+    "@turf/turf": "^6.5.0",
     "maplibre-gl": "^2.4.0",
+    "pbf": "^3.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
     "turf": "^3.0.14",
     "typescript": "^4.4.2",
     "uuid": "^9.0.0",
-    "web-vitals": "^2.1.0"
+    "web-vitals": "^2.1.0",
+    "zustand": "^5.0.8"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build && rm -rf docs && mv build docs",
     "test": "react-scripts test",
+    "test:ci": "react-scripts test --watchAll=false --runInBand",
+    "typecheck": "tsc --noEmit",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -46,5 +56,11 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "resolutions": {
+    "babel-preset-current-node-syntax": "1.0.1"
+  },
+  "overrides": {
+    "babel-preset-current-node-syntax": "1.0.1"
   }
 }

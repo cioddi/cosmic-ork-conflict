@@ -4,6 +4,8 @@ import { MapLibreMap } from "@mapcomponents/react-maplibre";
 import GameDataLayers from "./game/GameDataLayers";
 import Header from "./components/Header";
 import GameInterface from "./components/GameInterface";
+import MapSelectionCamera from "./game/view/MapSelectionCamera";
+import GameStatusOverlay from "./game/view/GameStatusOverlay";
 
 
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -22,6 +24,8 @@ function App() {
         }}
       />
       <GameDataLayers />
+      <MapSelectionCamera />
+      <GameStatusOverlay />
       <GameInterface />
     </>
   );

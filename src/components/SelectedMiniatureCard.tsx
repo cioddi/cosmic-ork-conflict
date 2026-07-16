@@ -1,7 +1,7 @@
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
-import { MiniatureGeoJsonFeature } from "../game/classes/Game";
+import { MiniatureGeoJsonFeature } from "../game/view/MapLibreSnapshotAdapter";
 import { getImageSrcFromProps } from "../game/GameDataLayers";
 import { MiniatureType } from "../game/classes/Miniature";
 import { Avatar, CardHeader, IconButton } from "@mui/material";

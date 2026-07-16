@@ -8,7 +8,7 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { useGame } from "../game/GameContext";
 import Player from "../game/classes/Player";
-import { GameStateFeatureCollectionType } from "../game/classes/Game";
+import { GameStateFeatureCollectionType } from "../game/view/MapLibreSnapshotAdapter";
 import { Avatar } from "@mui/material";
 
 interface PlayerStatsType {

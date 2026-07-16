@@ -54,63 +54,56 @@ export default class SequentialAI implements PlayerInterface {
   }
 
   // Method to play the game until a winner is determined
-  playRound(game: Game) {
-
-    // Find all available miniatures for this player
+  playRound(game: Game): void {
     const availableMinis = game.getAvailableMinis(this.miniatures);
-
-    // Check if any of them are in range to attack the enemy
-    const attackingMinis = availableMinis.filter((mini) => {
-      const enemy = game.getNearestEnemy(mini, this);
-      
-      const {distance} = enemy
-        ? game.getDistanceAndBearing(mini, enemy)
-        : {distance:Infinity};
-
-      // Check if any of the miniature's weapons are in range
-      return mini.state.weapons.some((weapon) => distance <= weapon.range);
-    });
-    //console.log('attackingMinis',attackingMinis);
-    
-
-    // Attack with all miniatures that can attack
-    attackingMinis.forEach((mini) => {
-      const enemyMini = game.getNearestEnemy(mini, this);
-      if (enemyMini) {
-        game.melee(this, mini, enemyMini);
-      }
-    });
-
-    // Find all miniatures that didn't attack
-    const nonAttackingMinis = availableMinis.filter(
-      (mini) => !attackingMinis.includes(mini)
-    );
-
-    //console.log('nonAttackingMinis',nonAttackingMinis?.[0]?.state?.position);
-    // Move all miniatures that didn't attack towards the enemy
-    nonAttackingMinis.forEach((mini) => {
-      const enemyMini = game.getNearestEnemy(mini, this);
-
+    availableMinis.forEach((mini) => {
+      let plan = game.getNearestReachableEnemyPlan(mini, this);
+      let enemyMini = plan?.enemy ?? game.getNearestEnemy(mini, this);
       if (!enemyMini) return;
 
-      const distanceAndBearing = game.getDistanceAndBearing(mini, enemyMini);
+      let { distance } = game.getDistanceAndBearing(mini, enemyMini);
+      const usableWeapon = mini.state.weapons
+        .filter((weapon) => {
+          const effectiveRange =
+            weapon.range <= game.rules.closeCombatRangeMeters
+              ? game.rules.closeCombatRangeMeters
+              : weapon.range;
+          return distance <= effectiveRange;
+        })
+        .sort((left, right) => right.range - left.range)[0];
 
-      //console.log("distance", distanceAndBearing);
-      
-      // Calculate how far the miniature can move this round
-      const movement = mini?.state.speed;
-      const { distance, bearing } = distanceAndBearing;
+      if (usableWeapon) {
+        if (usableWeapon.range > game.rules.closeCombatRangeMeters) {
+          game.ranged(this, mini, enemyMini);
+        } else {
+          game.melee(this, mini, enemyMini);
+        }
+      }
 
-      if (movement >= distance) {
-        // The miniature can reach the enemy this round, so move it as close as possible
-        game.move(this, mini, [[distance, bearing]]);
-      } else {
-        // The miniature can't reach the enemy this round, so move it as far as it can
-        game.move(this, mini, [[movement, bearing]]);
+      if (enemyMini.state.hitpoints <= 0) {
+        plan = game.getNearestReachableEnemyPlan(mini, this);
+        enemyMini = plan?.enemy ?? game.getNearestEnemy(mini, this);
+        if (!enemyMini) return;
+        distance = game.getDistanceAndBearing(mini, enemyMini).distance;
+      }
+
+      if (enemyMini.state.hitpoints > 0 && distance > game.rules.closeCombatRangeMeters) {
+        const movementBudget = Math.min(
+          mini.state.speed * game.rules.movementDistanceMultiplier,
+          distance - game.rules.closeCombatRangeMeters
+        );
+        if (movementBudget > 0) {
+          game.moveMiniatureToward(
+            this,
+            mini,
+            [...enemyMini.state.position],
+            movementBudget,
+            plan?.enemy === enemyMini ? plan.path : undefined
+          );
+        }
       }
     });
 
-    // End the round and switch to the other player
     game.switchPlayers();
   }
 }
