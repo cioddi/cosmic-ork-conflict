@@ -31,15 +31,13 @@ export default function GameInterface() {
   >("units");
 
   const leaders = useMemo(() => {
-    let _leaders: MiniatureGeoJsonFeature[] = [
-      ...(game?.geojson?.features ? game?.geojson?.features : []),
-    ];
+    let _leaders: MiniatureGeoJsonFeature[] = [...(game?.geojson?.features ?? [])];
     if (hideTheDead) {
       _leaders = _leaders.filter((el) => el.properties.hitpoints > 0);
     }
 
     return _leaders.sort((el1, el2) => {
-      return el2?.properties?.killCount - el1?.properties?.killCount;
+      return el2.properties.killCount - el1.properties.killCount;
     });
   }, [game, hideTheDead]);
 
@@ -77,18 +75,21 @@ export default function GameInterface() {
       )}
       <Grid
         container
+        className="game-interface-bar"
         sx={{
           position: "fixed",
+          left: 0,
+          right: 0,
           bottom: 0,
+          width: "100%",
+          boxSizing: "border-box",
           bgcolor: "background.paper",
           height: "30%",
-          overflow: matchesXs ? "auto" : "none",
+          overflow: matchesXs ? "auto" : "hidden",
         }}
       >
         <Grid
-          item
-          sm={4}
-          xs={12}
+          size={{ sm: 4, xs: 12 }}
           sx={{
             ...(matchesXs
               ? { display: selectedView === "units" ? "block" : "none" }
@@ -99,7 +100,7 @@ export default function GameInterface() {
         >
           <Box>
             <Checkbox
-              inputProps={{ "aria-label": "hide the dead" }}
+              slotProps={{ input: { "aria-label": "hide the dead" } }}
               icon={<VisibilityIcon />}
               checkedIcon={<VisibilityOffIcon />}
               onClick={() => {
@@ -118,9 +119,7 @@ export default function GameInterface() {
           </List>
         </Grid>
         <Grid
-          item
-          sm={4}
-          xs={12}
+          size={{ sm: 4, xs: 12 }}
           sx={{
             ...(matchesXs
               ? { display: selectedView === "selected" ? "block" : "none" }
@@ -141,9 +140,7 @@ export default function GameInterface() {
           )}
         </Grid>
         <Grid
-          item
-          sm={4}
-          xs={12}
+          size={{ sm: 4, xs: 12 }}
           sx={{
             display: "flex",
             ...(matchesXs

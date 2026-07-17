@@ -180,7 +180,7 @@ export class OptimizedNavigationModel {
   /**
    * Check if a position is walkable (fast lookup)
    */
-  isPointWalkable(position: [number, number]): boolean {
+  isPointWalkable(_position: [number, number]): boolean {
     // This is a simplified check - in practice, you'd use the spatial index
     // from the path network to quickly determine walkability
     return true; // For now, assume all points are walkable
@@ -339,8 +339,8 @@ export class OptimizedNavigationModel {
 
   private executeDirectMovement(
     start: [number, number],
-    target: [number, number],
-    maxDistance: number
+    _target: [number, number],
+    _maxDistance: number
   ): MovementResult {
     // Direct movement blocked - units must use transportation network only
     console.warn('Direct movement blocked in OptimizedNavigationModel');

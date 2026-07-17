@@ -207,6 +207,13 @@ export default function GameDataLayers() {
     const removeListeners = installLayers();
 
     return () => {
+      // React may clean up MapLibreView's parent effect before this child
+      // effect. Map#remove clears the style, so no layer API is safe after the
+      // container loses MapLibre's marker class (and no cleanup is needed).
+      if (!map.getContainer().classList.contains("maplibregl-map")) {
+        setLayersReady(false);
+        return;
+      }
       removeListeners?.();
       if (installed) {
         for (const layerId of [...GAME_LAYER_IDS].reverse()) {
@@ -234,11 +241,10 @@ export default function GameDataLayers() {
       setViewReady(false);
       return;
     }
-    let firstFrame: number | undefined;
-    let secondFrame: number | undefined;
-    firstFrame = requestAnimationFrame(() => {
+    const firstFrame = requestAnimationFrame(() => {
       secondFrame = requestAnimationFrame(() => setViewReady(true));
     });
+    let secondFrame: number | undefined;
     return () => {
       if (firstFrame !== undefined) cancelAnimationFrame(firstFrame);
       if (secondFrame !== undefined) cancelAnimationFrame(secondFrame);

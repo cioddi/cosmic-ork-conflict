@@ -3,6 +3,7 @@ import Miniature, { MiniatureParams, MiniatureType } from "./Miniature";
 import SequentialAI from "./SequentialAI";
 import { GameWorld, LocalProjection, WorldDefinition, WorldPoint, WorldPolygon, worldBoundsForPoints } from "../world";
 import { GridNavigation } from "../navigation/GridNavigation";
+import { vi } from "vitest";
 
 function polygon(id: string, points: WorldPoint[]): WorldPolygon {
   return { id, outer: points, holes: [], bounds: worldBoundsForPoints(points) };
@@ -108,7 +109,7 @@ test("AI uses the configured larger movement budget per round", () => {
   const player1 = new SequentialAI(1, "one", [mover], "red");
   const player2 = new SequentialAI(2, "two", [target], "yellow");
   const navigation = new GridNavigation(world);
-  const findPath = jest.spyOn(navigation, "findPath");
+  const findPath = vi.spyOn(navigation, "findPath");
   const game = new Game([player1, player2], world, navigation, () => 0.5);
 
   game.beginStep();

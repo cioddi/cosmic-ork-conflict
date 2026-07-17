@@ -1,5 +1,5 @@
-import { v4 as uuidv4 } from "uuid";
 import { WorldPoint } from "../world";
+import { createId } from "../../utils/createId";
 
 export enum MiniatureType {
   // A unique individual or hero.
@@ -53,7 +53,7 @@ export default class Miniature {
       mobilityProfileId:
         options.mobilityProfileId ??
         (options.type === MiniatureType.VEHICLE ? "vehicle" : "infantry"),
-      id: uuidv4(),
+      id: options.id ?? createId("unit"),
       damageDealt: 0,
       unitsKilled: [],
       killCount: 0,

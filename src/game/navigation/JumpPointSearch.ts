@@ -111,7 +111,9 @@ export class JumpPointSearch {
             const buildingPolygon = turf.polygon(building.coordinates);
 
             // Find intersection between cell and building
-            const intersection = turf.intersect(cellPolygon, buildingPolygon);
+            const intersection = turf.intersect(
+              turf.featureCollection([cellPolygon, buildingPolygon])
+            );
 
             if (intersection) {
               const intersectionArea = turf.area(intersection);

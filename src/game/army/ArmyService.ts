@@ -1,4 +1,5 @@
 import { UNIT_CATALOG, UNIT_CATALOG_BY_ID } from "./catalog";
+import { createId as createCompatibleId } from "../../utils/createId";
 
 export const ARMY_STORAGE_KEY = "cosmic-ork-conflict.armies.v1";
 export const ARMY_STORAGE_VERSION = 1;
@@ -247,10 +248,7 @@ function normalizeArmy(army: ArmyDefinition): ArmyDefinition {
 }
 
 function createId(): string {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return crypto.randomUUID();
-  }
-  return `army-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  return createCompatibleId("army");
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

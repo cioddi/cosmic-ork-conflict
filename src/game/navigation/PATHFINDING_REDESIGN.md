@@ -1,5 +1,10 @@
 # Pathfinding System Redesign
 
+> Historical design record: the Deck.gl-based debug layers described below were
+> unreachable from the current application and were removed during the Vite
+> migration. The renderer-neutral world and active navigation tests are the
+> authoritative references for current behavior.
+
 ## Overview
 
 Complete redesign of the pathfinding system from a complex pre-computed network approach to a simpler, more efficient building-aware pathfinding system.

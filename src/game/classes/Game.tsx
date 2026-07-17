@@ -351,7 +351,7 @@ export default class Game {
         player.miniatures.map((miniature) => ({
           playerId: player.id,
           position: [...miniature.state.position] as WorldPoint,
-          properties: (({ position, ...properties }: MiniatureOptions) => ({
+          properties: (({ position: _position, ...properties }: MiniatureOptions) => ({
             ...properties,
             unitsKilled: [...properties.unitsKilled],
             weapons: properties.weapons.map((weapon) => ({ ...weapon })),

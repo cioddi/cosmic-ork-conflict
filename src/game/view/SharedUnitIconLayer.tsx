@@ -30,13 +30,10 @@ export default function SharedUnitIconLayer(props: {
           ({ id, url }) =>
             new Promise<{ id: string; image?: UnitIconImage }>((resolve, reject) => {
               if (map.hasImage(id)) return resolve({ id });
-              map.loadImage(url, (error, image) => {
-                if (error || !image) {
-                  reject(error ?? new Error(`Unable to load ${url}`));
-                  return;
-                }
-                resolve({ id, image });
-              });
+              map.loadImage(url).then(
+                (response) => resolve({ id, image: response.data }),
+                reject
+              );
             }).catch((error: unknown) => ({ id, error }))
         )
       )

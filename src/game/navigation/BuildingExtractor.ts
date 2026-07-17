@@ -6,7 +6,7 @@
  */
 
 import { VectorTile } from '@mapbox/vector-tile';
-import Pbf from 'pbf';
+import { PbfReader } from 'pbf';
 import * as turf from '@turf/turf';
 import type { Position } from 'geojson';
 
@@ -156,7 +156,7 @@ export class BuildingExtractor {
             this.addToSpatialGrid(building);
 
             buildingCount++;
-          } catch (featureError) {
+          } catch {
             // Skip problematic features
             skippedCount++;
             continue;
@@ -225,7 +225,6 @@ export class BuildingExtractor {
       const polygon = turf.polygon(building.coordinates);
 
       try {
-        // @ts-ignore - booleanIntersects exists but TypeScript definition is missing
         if (turf.booleanIntersects(line, polygon)) {
           intersectingBuildings.push(building);
         }
@@ -273,7 +272,7 @@ export class BuildingExtractor {
       });
 
       return simplified.geometry.coordinates as Position[][];
-    } catch (error) {
+    } catch {
       // If simplification fails, return original
       return coordinates;
     }
@@ -350,7 +349,7 @@ export class BuildingExtractor {
       }
 
       const arrayBuffer = await response.arrayBuffer();
-      const pbf = new Pbf(new Uint8Array(arrayBuffer));
+      const pbf = new PbfReader(new Uint8Array(arrayBuffer));
       const vectorTile = new VectorTile(pbf);
 
       return { layers: vectorTile.layers };

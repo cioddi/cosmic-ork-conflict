@@ -312,7 +312,7 @@ class EnhancedPathfinder {
           try {
             const fallbackPath = this.navigationModel.findPath(start, goal);
             resolve(fallbackPath);
-          } catch (error) {
+          } catch {
             resolve([start, goal]);
           }
         } else {
@@ -348,7 +348,7 @@ class EnhancedPathfinder {
                 pending.resolve(path);
               }
             }
-          } catch (error) {
+          } catch {
             const pending = this.pendingRequests.get(requestId);
             if (pending) {
               pending.resolve([start, goal]);

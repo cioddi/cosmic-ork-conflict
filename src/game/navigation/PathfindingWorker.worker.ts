@@ -24,7 +24,6 @@ class PathfindingWorkerClass {
   private pathfinder: NetworkPathfinder | null = null;
 
   constructor() {
-    // eslint-disable-next-line no-restricted-globals
     self.onmessage = this.handleMessage.bind(this);
   }
 
@@ -72,7 +71,6 @@ class PathfindingWorkerClass {
       type: 'networkInitialized'
     };
 
-    // eslint-disable-next-line no-restricted-globals
     self.postMessage(response);
   }
 
@@ -95,7 +93,6 @@ class PathfindingWorkerClass {
       path
     };
 
-    // eslint-disable-next-line no-restricted-globals
     self.postMessage(response);
   }
 
@@ -106,7 +103,6 @@ class PathfindingWorkerClass {
       error: message
     };
 
-    // eslint-disable-next-line no-restricted-globals
     self.postMessage(response);
   }
 }

@@ -40,7 +40,6 @@ export default function FolderList(props: {
             : "initial",
       }}
       onClick={() => {
-        console.log(props?.miniature?.properties?.id);
         game?.setSelectedMiniatureId(props?.miniature?.properties?.id);
       }}
     >
@@ -65,11 +64,13 @@ export default function FolderList(props: {
       </ListItemAvatar>
       <ListItemText
         primary={props.miniature.properties.name}
-        primaryTypographyProps={{
-          color:
-            game?.selectedMiniatureId === props.miniature.properties.id
-              ? "primary.contrastText"
-              : "primary.main",
+        slotProps={{
+          primary: {
+            color:
+              game?.selectedMiniatureId === props.miniature.properties.id
+                ? "primary.contrastText"
+                : "primary.main",
+          },
         }}
         secondary={
           "Kills: " +

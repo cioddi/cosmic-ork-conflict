@@ -353,7 +353,6 @@ export class BuildingAwarePathfinder {
         const line = turf.lineString([from, to]);
         const polygon = turf.polygon(building.coordinates);
 
-        // @ts-ignore - booleanIntersects exists but TypeScript definition is missing
         if (turf.booleanIntersects(line, polygon)) {
           intersectingBuildings.push(building);
         }

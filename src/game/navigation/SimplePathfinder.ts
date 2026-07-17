@@ -153,7 +153,6 @@ export class SimplePathfinder {
         const line = turf.lineString([from, to]);
         const polygon = turf.polygon(building.coordinates);
 
-        // @ts-ignore
         if (turf.booleanIntersects(line, polygon)) {
           return true; // Blocked!
         }

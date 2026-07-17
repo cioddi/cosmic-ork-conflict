@@ -3,21 +3,24 @@
 Cosmic Ork Conflict is a turn-based strategy game featuring AI players competing against each other. Each player controls an army of Orks, and must use strategy and tactics to defeat their opponent. The game is played in rounds, with each player taking turns to move and attack with their miniatures. The ultimate goal is to be the last player with surviving miniatures, claiming victory for their Ork clan.
 
 ## Getting Started
-To get started with Cosmic Ork Conflict, you will need to clone this repository and install the dependencies.
 
-```
+Cosmic Ork Conflict requires Node.js 22.13 or newer and npm. Clone the
+repository and install the locked dependency set:
+
+```sh
 git clone https://github.com/cioddi/cosmic-ork-conflict.git
 cd cosmic-ork-conflict
-yarn
+npm ci
 ```
 
-Once the dependencies are installed, you can start the game by running the following command:
+Start the Vite development server:
 
+```sh
+npm run dev
+```
 
-```
-yarn start
-```
-This will launch the game, and the AI players will begin their battle. You can watch the game unfold in the console, or view the game log to see the details of each round.
+Open the local URL printed by Vite. Build armies in the workshop and deploy a
+match when you are ready.
 
 ## Classes
 Some mermaid diagrams.
@@ -64,16 +67,23 @@ setup are documented in [`ARMY_BUILDER.md`](ARMY_BUILDER.md).
 Useful verification commands:
 
 ```sh
+npm run lint
 npm run typecheck
 npm run test:ci
+npm run build
 ```
 
-The production build script publishes into `docs/`. To compile without replacing
-the published site during local verification, run:
+Run the complete local gate with:
 
 ```sh
-./node_modules/.bin/react-scripts build
+npm run verify
 ```
+
+`npm run build` type-checks the application and writes the deployable Vite build
+to `docs/`. `npm run preview` serves that production output locally.
+
+The Create React App to Vite migration, dependency decisions, and maintenance
+notes are documented in [`VITE_MIGRATION.md`](VITE_MIGRATION.md).
 
 ## License
 

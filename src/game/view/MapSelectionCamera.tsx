@@ -6,7 +6,7 @@ import { useMapLibreMap } from "./MapLibreView";
 export default function MapSelectionCamera() {
   const state = useGame();
   const map = useMapLibreMap();
-  const previousId = useRef<string>();
+  const previousId = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     const selected = state?.selectedMiniature;

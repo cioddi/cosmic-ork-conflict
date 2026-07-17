@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
+import { vi, type MockInstance } from "vitest";
 import { GameProvider, useGame } from "./GameContext";
 import {
   GameWorld,
@@ -11,10 +12,10 @@ import {
 import { createArmy, setArmyUnitCount, UNIT_CATALOG } from "./army";
 
 const originalConsoleError = console.error;
-let consoleErrorSpy: jest.SpyInstance;
+let consoleErrorSpy: MockInstance;
 
 beforeEach(() => {
-  consoleErrorSpy = jest.spyOn(console, "error").mockImplementation((message, ...args) => {
+  consoleErrorSpy = vi.spyOn(console, "error").mockImplementation((message, ...args) => {
     if (
       typeof message === "string" &&
       message.includes("ReactDOMTestUtils.act")
@@ -27,7 +28,7 @@ beforeEach(() => {
 
 afterEach(() => {
   consoleErrorSpy.mockRestore();
-  jest.useRealTimers();
+  vi.useRealTimers();
 });
 
 function polygon(id: string, points: WorldPoint[]): WorldPolygon {
@@ -103,6 +104,7 @@ function ReadinessProbe() {
     <>
       <output data-testid="status">{state?.status}</output>
       <output data-testid="tick">{state?.snapshot?.tick ?? -1}</output>
+      <output data-testid="has-game">{state?.game ? "yes" : "no"}</output>
       <button type="button" onClick={() => state?.setViewReady(true)}>
         ready
       </button>
@@ -112,12 +114,15 @@ function ReadinessProbe() {
       >
         battle
       </button>
+      <button type="button" onClick={() => state?.openArmyBuilder()}>
+        builder
+      </button>
     </>
   );
 }
 
 test("the simulation remains at tick zero until the view reports readiness", async () => {
-  jest.useFakeTimers();
+  vi.useFakeTimers();
   const world = createOpenWorld();
 
   render(
@@ -134,14 +139,36 @@ test("the simulation remains at tick zero until the view reports readiness", asy
   fireEvent.click(screen.getByRole("button", { name: "battle" }));
   expect(screen.getByTestId("status")).toHaveTextContent("preparing-view");
   expect(screen.getByTestId("tick")).toHaveTextContent("0");
-  act(() => jest.advanceTimersByTime(2_000));
+  act(() => vi.advanceTimersByTime(2_000));
   expect(screen.getByTestId("tick")).toHaveTextContent("0");
 
   fireEvent.click(screen.getByRole("button", { name: "ready" }));
   expect(screen.getByTestId("status")).toHaveTextContent("running");
-  act(() => jest.advanceTimersByTime(649));
+  act(() => vi.advanceTimersByTime(649));
   expect(screen.getByTestId("tick")).toHaveTextContent("0");
-  act(() => jest.advanceTimersByTime(1));
+  act(() => vi.advanceTimersByTime(1));
   expect(screen.getByTestId("tick")).toHaveTextContent("1");
 
+});
+
+test("returning to the army builder clears the active game", async () => {
+  const world = createOpenWorld();
+
+  render(
+    <GameProvider loadWorld={() => Promise.resolve(world)}>
+      <ReadinessProbe />
+    </GameProvider>
+  );
+  await act(async () => {
+    await Promise.resolve();
+    await Promise.resolve();
+  });
+
+  fireEvent.click(screen.getByRole("button", { name: "battle" }));
+  expect(screen.getByTestId("has-game")).toHaveTextContent("yes");
+
+  fireEvent.click(screen.getByRole("button", { name: "builder" }));
+  expect(screen.getByTestId("has-game")).toHaveTextContent("no");
+  expect(screen.getByTestId("status")).toHaveTextContent("army-selection");
+  expect(screen.getByTestId("tick")).toHaveTextContent("-1");
 });

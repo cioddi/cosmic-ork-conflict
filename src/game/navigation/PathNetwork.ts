@@ -4,7 +4,7 @@
  */
 
 import { VectorTile } from '@mapbox/vector-tile';
-import Pbf from 'pbf';
+import { PbfReader } from 'pbf';
 
 export interface PathNode {
   id: string;
@@ -345,7 +345,7 @@ export class PathNetworkGenerator {
       }
 
       // Parse the Protobuf Vector Tile
-      const pbf = new Pbf(new Uint8Array(arrayBuffer));
+      const pbf = new PbfReader(new Uint8Array(arrayBuffer));
       const vectorTile = new VectorTile(pbf);
 
 
@@ -513,7 +513,7 @@ export class PathNetworkGenerator {
     return distance * multiplier;
   }
 
-  private isPositionWalkable(position: [number, number], walkableAreas: any[]): boolean {
+  private isPositionWalkable(_position: [number, number], _walkableAreas: any[]): boolean {
     // Check if position is not inside buildings or other obstacles
     // This is a simplified check - in practice you'd do proper polygon intersection
     return true;
@@ -528,7 +528,7 @@ export class PathNetworkGenerator {
     });
   }
 
-  private isConnectionValid(pos1: [number, number], pos2: [number, number]): boolean {
+  private isConnectionValid(_pos1: [number, number], _pos2: [number, number]): boolean {
     // Check if direct line between positions doesn't intersect buildings
     // This is a simplified check
     return true;

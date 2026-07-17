@@ -32,6 +32,18 @@
   left: 0;
   bottom: 0;
 }
+.battle-view-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  color: #d8ff72;
+  background: #080b09;
+  font: 700 14px ui-monospace, monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
 .mapboxgl-ctrl-bottom-right, .maplibregl-ctrl-bottom-right {
   bottom: 30% !important;
   position: fixed !important;

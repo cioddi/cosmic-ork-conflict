@@ -22,10 +22,10 @@ function getPlayerStats(
   player: Player,
   geojson: GameStateFeatureCollectionType
 ): PlayerStatsType {
-  let playerUnits = geojson.features.filter(
+  const playerUnits = geojson.features.filter(
     (el) => el.properties.playerId === player.id
   );
-  let livingUnits = playerUnits.filter((el) => el.properties.hitpoints > 0);
+  const livingUnits = playerUnits.filter((el) => el.properties.hitpoints > 0);
   let killCount = 0;
   let damageDealt = 0;
   playerUnits.forEach((el) => {
@@ -46,7 +46,7 @@ export default function GameStatsTable() {
   const game = useGame();
 
   const stats = React.useMemo(() => {
-    let stats: {
+    const stats: {
       round: number;
       winner: number | undefined;
       players: PlayerStatsType[];

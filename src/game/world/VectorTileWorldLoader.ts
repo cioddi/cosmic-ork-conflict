@@ -1,5 +1,5 @@
 import { VectorTile } from "@mapbox/vector-tile";
-import Pbf from "pbf";
+import { PbfReader } from "pbf";
 import { GameWorld } from "./GameWorld";
 import { LocalProjection } from "./LocalProjection";
 import {
@@ -113,7 +113,7 @@ export function decodeBuildings(
   sourceLayer: string,
   projection: LocalProjection
 ): WorldPolygon[] {
-  const tile = new VectorTile(new Pbf(new Uint8Array(buffer)));
+  const tile = new VectorTile(new PbfReader(new Uint8Array(buffer)));
   const layer = tile.layers[sourceLayer];
   if (!layer) return [];
   const result: WorldPolygon[] = [];

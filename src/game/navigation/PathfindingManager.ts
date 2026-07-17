@@ -3,7 +3,12 @@
  * Provides efficient pathfinding with worker-based computation and smart caching
  */
 
-import { PathNetwork, PathNetworkGenerator, NetworkGenerationOptions } from './PathNetwork';
+import {
+  NetworkPathfinder,
+  PathNetwork,
+  PathNetworkGenerator,
+  NetworkGenerationOptions,
+} from './PathNetwork';
 import { PathfindingRequest, PathfindingResponse } from './PathfindingWorker.worker';
 
 export interface PathCache {
@@ -84,7 +89,6 @@ export class PathfindingManager {
       console.log(`Sync pathfinding from ${start} to ${end}`);
 
       // Use the fixed A* pathfinding with safeguards
-      const { NetworkPathfinder } = require('./PathNetwork');
       const pathfinder = new NetworkPathfinder(this.network);
 
       console.log('Starting A* pathfinding...');

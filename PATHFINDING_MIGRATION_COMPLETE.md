@@ -1,5 +1,10 @@
 # Pathfinding Migration Complete ✅
 
+> Historical implementation record: the Deck.gl-based debug layers described
+> below were unreachable from the current application and were removed during
+> the Vite migration. The renderer-neutral world and active navigation tests are
+> the authoritative references for current behavior.
+
 ## Summary
 
 Successfully migrated from the complex PathNetwork system to the new building-aware pathfinding system. The old transportation network has been completely replaced.

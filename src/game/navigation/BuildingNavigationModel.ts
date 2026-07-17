@@ -1,6 +1,6 @@
 import { Feature, MultiPolygon, Polygon } from "geojson";
 import { VectorTile } from "@mapbox/vector-tile";
-import Pbf from "pbf";
+import { PbfReader } from "pbf";
 import * as turf from "@turf/turf";
 
 import {
@@ -212,7 +212,7 @@ async function resolveBuildingLayerInfo(
   const sourceName: string = buildingLayer.source;
   const source = style.sources?.[sourceName];
   if (!source) {
-    throw new Error(`Style source \"${sourceName}\" is not defined.`);
+    throw new Error(`Style source "${sourceName}" is not defined.`);
   }
 
   let tiles: string[] = [];
@@ -287,7 +287,7 @@ async function fetchBuildingsForTile(
         continue;
       }
       const arrayBuffer = await response.arrayBuffer();
-      const tile = new VectorTile(new Pbf(arrayBuffer));
+      const tile = new VectorTile(new PbfReader(arrayBuffer));
       const layer = tile.layers[layerName];
       if (!layer) {
         continue;
