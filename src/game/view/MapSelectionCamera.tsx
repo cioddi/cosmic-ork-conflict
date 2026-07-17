@@ -1,24 +1,23 @@
 import { useEffect, useRef } from "react";
-import { useMap } from "@mapcomponents/react-maplibre";
 import { LngLatLike } from "maplibre-gl";
 import { useGame } from "../GameContext";
+import { useMapLibreMap } from "./MapLibreView";
 
 export default function MapSelectionCamera() {
   const state = useGame();
-  const mapHook = useMap({ mapId: "map_1" });
+  const map = useMapLibreMap();
   const previousId = useRef<string>();
 
   useEffect(() => {
     const selected = state?.selectedMiniature;
     const selectedId = state?.selectedMiniatureId;
-    if (!selected || !selectedId || !mapHook.map || previousId.current === selectedId) return;
+    if (!selected || !selectedId || !map || previousId.current === selectedId) return;
     previousId.current = selectedId;
-    mapHook.map.map.easeTo({
+    map.easeTo({
       center: selected.geometry.coordinates as LngLatLike,
       zoom: 16,
     });
-  }, [state?.selectedMiniature, state?.selectedMiniatureId, mapHook.map]);
+  }, [state?.selectedMiniature, state?.selectedMiniatureId, map]);
 
   return null;
 }
-

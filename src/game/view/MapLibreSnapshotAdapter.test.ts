@@ -1,5 +1,10 @@
-import { MovementTrace } from "../classes/Game";
-import { sampleMovementTrace } from "./MapLibreSnapshotAdapter";
+import { GameSnapshot, MovementTrace } from "../classes/Game";
+import { MiniatureType } from "../classes/Miniature";
+import { LocalProjection } from "../world";
+import {
+  gameSnapshotToRenderedGeoJSON,
+  sampleMovementTrace,
+} from "./MapLibreSnapshotAdapter";
 
 const trace: MovementTrace = {
   unitId: "unit",
@@ -22,3 +27,52 @@ test("clamps trace samples and reports segment bearing", () => {
   expect(sampleMovementTrace(trace, 0.5).bearing).toBeCloseTo(0, 8);
 });
 
+test("creates a minimal animation payload without gameplay-only properties", () => {
+  const snapshot: GameSnapshot = {
+    tick: 0,
+    movementTraces: [],
+    units: [
+      {
+        playerId: 1,
+        position: [0, 0],
+        properties: {
+          id: "unit",
+          name: "Unit",
+          image: "assets/biker_1.png",
+          description: "Large property that the renderer does not need",
+          type: MiniatureType.VEHICLE,
+          size: { x: 1, y: 1, z: 1 },
+          bearing: 0,
+          speed: 5,
+          meleeAttack: 1,
+          rangeAttack: 1,
+          armour: 1,
+          hitpoints: 10,
+          weapons: [{ name: "weapon", description: "", damage: 1, range: 1 }],
+          damageDealt: 0,
+          killCount: 0,
+          unitsKilled: [],
+        },
+      },
+    ],
+  };
+
+  const properties = gameSnapshotToRenderedGeoJSON(
+    snapshot,
+    new LocalProjection([0, 0])
+  ).features[0].properties;
+
+  expect(properties).toEqual({
+    id: "unit",
+    name: "Unit",
+    type: MiniatureType.VEHICLE,
+    iconId: "unit-orc-biker",
+    size: { x: 1, y: 1, z: 1 },
+    hitpoints: 10,
+    killCount: 0,
+    bearing: 0,
+    playerId: 1,
+  });
+  expect(properties).not.toHaveProperty("description");
+  expect(properties).not.toHaveProperty("weapons");
+});

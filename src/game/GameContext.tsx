@@ -1,5 +1,6 @@
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -9,7 +10,6 @@ import {
 import Game, { GameSnapshot } from "./classes/Game";
 import SequentialAI from "./classes/SequentialAI";
 import Miniature, { MiniatureType } from "./classes/Miniature";
-import { orcUnits } from "./armylist/orcs";
 import { GridNavigation } from "./navigation/GridNavigation";
 import {
   VectorTileWorldLoader,
@@ -22,9 +22,16 @@ import {
   MiniatureGeoJsonFeature,
   gameSnapshotToGeoJSON,
 } from "./view/MapLibreSnapshotAdapter";
+import {
+  BattleArmies,
+  expandArmyUnitIds,
+  isUsableArmy,
+  UNIT_CATALOG_BY_ID,
+} from "./army";
 
 export type GameLoadStatus =
   | "loading-world"
+  | "army-selection"
   | "creating-game"
   | "preparing-view"
   | "running"
@@ -39,15 +46,15 @@ interface GameContextValue {
   selectedMiniatureId: string | undefined;
   setSelectedMiniatureId: (id: string | undefined) => void;
   setViewReady: (ready: boolean) => void;
+  startBattle: (armies: BattleArmies) => void;
+  openArmyBuilder: () => void;
   status: GameLoadStatus;
   error: string | undefined;
 }
 
 const GameContext = createContext<GameContextValue | null>(null);
-const UNITS_PER_PLAYER = 12;
 const TICK_INTERVAL_MS = 650;
 
-let selectedCharacterIds: number[] = [];
 let parisWorldPromise: Promise<Game["world"]> | undefined;
 
 function loadParisWorld(): Promise<Game["world"]> {
@@ -62,27 +69,16 @@ function loadParisWorld(): Promise<Game["world"]> {
   return parisWorldPromise;
 }
 
-function getRandomOrkUnitId(random: () => number): number {
-  return Math.floor(random() * orcUnits.length);
-}
-
-function createRandomUnit(
+function createArmyUnit(
+  unitId: string,
   playerIndex: number,
   world: Game["world"],
   navigation: GridNavigation,
   random: () => number
 ): Miniature {
-  let unitId = getRandomOrkUnitId(random);
-  while (
-    MiniatureType[orcUnits[unitId].type] === "CHARACTER" &&
-    selectedCharacterIds.includes(unitId)
-  ) {
-    unitId = getRandomOrkUnitId(random);
-  }
-  if (MiniatureType[orcUnits[unitId].type] === "CHARACTER") {
-    selectedCharacterIds.push(unitId);
-  }
-  const template = orcUnits[unitId];
+  const entry = UNIT_CATALOG_BY_ID.get(unitId);
+  if (!entry) throw new Error(`Unknown unit catalogue id: ${unitId}`);
+  const template = entry.template;
   const mobilityProfileId =
     template.type === MiniatureType.VEHICLE ? "vehicle" : "infantry";
   return new Miniature({
@@ -112,6 +108,11 @@ export function GameProvider(props: GameProviderProps) {
   const [viewReady, setViewReady] = useState(false);
   const [status, setStatus] = useState<GameLoadStatus>("loading-world");
   const [error, setError] = useState<string>();
+  const [preparedWorld, setPreparedWorld] = useState<{
+    world: Game["world"];
+    navigation: GridNavigation;
+  }>();
+  const [battleArmies, setBattleArmies] = useState<BattleArmies>();
 
   const geojson = useMemo(
     () =>
@@ -130,6 +131,28 @@ export function GameProvider(props: GameProviderProps) {
     [geojson, selectedMiniatureId]
   );
 
+  const startBattle = useCallback((armies: BattleArmies) => {
+    if (!isUsableArmy(armies.first) || !isUsableArmy(armies.second)) {
+      setError("Both armies need at least one valid unit.");
+      return;
+    }
+    setError(undefined);
+    setSelectedMiniatureId(undefined);
+    setViewReady(false);
+    setBattleArmies(armies);
+    setStatus("creating-game");
+  }, []);
+
+  const openArmyBuilder = useCallback(() => {
+    simulationFinishedRef.current = true;
+    setViewReady(false);
+    setSelectedMiniatureId(undefined);
+    setSnapshot(undefined);
+    setGame(null);
+    setBattleArmies(undefined);
+    setStatus(preparedWorld ? "army-selection" : "loading-world");
+  }, [preparedWorld]);
+
   useEffect(() => {
     let cancelled = false;
 
@@ -141,23 +164,8 @@ export function GameProvider(props: GameProviderProps) {
         setStatus("creating-game");
         const navigation = new GridNavigation(world);
         navigation.initialize();
-        const random = createSeededRandom(0xc05c1c);
-        selectedCharacterIds = [];
-        const player1Units: Miniature[] = [];
-        const player2Units: Miniature[] = [];
-        for (let index = 0; index < UNITS_PER_PLAYER; index++) {
-          player1Units.push(createRandomUnit(0, world, navigation, random));
-          player2Units.push(createRandomUnit(1, world, navigation, random));
-        }
-        const players = [
-          new SequentialAI(1, "Player 1", player1Units, "red"),
-          new SequentialAI(2, "Player 2", player2Units, "yellow"),
-        ];
-        const nextGame = new Game(players, world, navigation, random);
-        simulationFinishedRef.current = false;
-        setGame(nextGame);
-        setSnapshot(nextGame.getSnapshot());
-        setStatus("preparing-view");
+        setPreparedWorld({ world, navigation });
+        setStatus("army-selection");
       } catch (caught) {
         if (cancelled) return;
         setError(caught instanceof Error ? caught.message : String(caught));
@@ -170,6 +178,49 @@ export function GameProvider(props: GameProviderProps) {
       cancelled = true;
     };
   }, [props.loadWorld]);
+
+  useEffect(() => {
+    if (!preparedWorld || !battleArmies) return;
+    try {
+      setStatus("creating-game");
+      const random = createSeededRandom(Date.now() >>> 0);
+      const player1Units = expandArmyUnitIds(battleArmies.first).map((unitId) =>
+        createArmyUnit(
+          unitId,
+          0,
+          preparedWorld.world,
+          preparedWorld.navigation,
+          random
+        )
+      );
+      const player2Units = expandArmyUnitIds(battleArmies.second).map((unitId) =>
+        createArmyUnit(
+          unitId,
+          1,
+          preparedWorld.world,
+          preparedWorld.navigation,
+          random
+        )
+      );
+      const players = [
+        new SequentialAI(1, battleArmies.first.name, player1Units, "red"),
+        new SequentialAI(2, battleArmies.second.name, player2Units, "yellow"),
+      ];
+      const nextGame = new Game(
+        players,
+        preparedWorld.world,
+        preparedWorld.navigation,
+        random
+      );
+      simulationFinishedRef.current = false;
+      setGame(nextGame);
+      setSnapshot(nextGame.getSnapshot());
+      setStatus("preparing-view");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : String(caught));
+      setStatus("error");
+    }
+  }, [preparedWorld, battleArmies]);
 
   useEffect(() => {
     if (!game || !viewReady || simulationFinishedRef.current) return;
@@ -203,6 +254,8 @@ export function GameProvider(props: GameProviderProps) {
         selectedMiniatureId,
         setSelectedMiniatureId,
         setViewReady,
+        startBattle,
+        openArmyBuilder,
         status,
         error,
       }}

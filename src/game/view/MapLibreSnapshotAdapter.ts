@@ -1,6 +1,7 @@
 import { GameSnapshot, MovementTrace } from "../classes/Game";
 import { MiniatureOptions } from "../classes/Miniature";
 import { LocalProjection, WorldPoint, interpolate } from "../world";
+import { getUnitIconId } from "./UnitIconRegistry";
 
 export interface MiniatureGeoJsonFeature {
   type: "Feature";
@@ -11,6 +12,22 @@ export interface MiniatureGeoJsonFeature {
 export interface GameStateFeatureCollectionType {
   type: "FeatureCollection";
   features: MiniatureGeoJsonFeature[];
+}
+
+export type RenderedMiniatureProperties = Pick<
+  MiniatureOptions,
+  "id" | "name" | "type" | "size" | "hitpoints" | "killCount" | "bearing"
+> & { playerId: number; iconId: string };
+
+export interface RenderedMiniatureGeoJsonFeature {
+  type: "Feature";
+  geometry: { type: "Point"; coordinates: [number, number] };
+  properties: RenderedMiniatureProperties;
+}
+
+export interface RenderedGameFeatureCollection {
+  type: "FeatureCollection";
+  features: RenderedMiniatureGeoJsonFeature[];
 }
 
 export interface TraceSample {
@@ -76,7 +93,41 @@ export function gameSnapshotToGeoJSON(
   };
 }
 
+/** Minimal frame payload consumed by the MapLibre unit layers. */
+export function gameSnapshotToRenderedGeoJSON(
+  snapshot: GameSnapshot,
+  projection: LocalProjection,
+  animationProgress = 1
+): RenderedGameFeatureCollection {
+  const traces = new Map(snapshot.movementTraces.map((trace) => [trace.unitId, trace]));
+  return {
+    type: "FeatureCollection",
+    features: snapshot.units.map((unit) => {
+      const trace = unit.properties.id ? traces.get(unit.properties.id) : undefined;
+      const sample = trace ? sampleMovementTrace(trace, animationProgress) : null;
+      const position = sample?.position ?? unit.position;
+      return {
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: [...projection.unproject(position)],
+        },
+        properties: {
+          id: unit.properties.id,
+          name: unit.properties.name,
+          type: unit.properties.type,
+          iconId: getUnitIconId(unit.properties.image, unit.properties.type),
+          size: unit.properties.size,
+          hitpoints: unit.properties.hitpoints,
+          killCount: unit.properties.killCount,
+          bearing: sample?.bearing ?? unit.properties.bearing,
+          playerId: unit.playerId,
+        },
+      };
+    }),
+  };
+}
+
 function bearing(from: WorldPoint, to: WorldPoint): number {
   return (Math.atan2(to[0] - from[0], to[1] - from[1]) * 180) / Math.PI;
 }
-

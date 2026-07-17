@@ -1,0 +1,241 @@
+.army-workshop {
+  --ork-green: #94df3f;
+  --ork-lime: #d8ff72;
+  --rust: #e0682f;
+  --panel: rgba(17, 22, 18, 0.96);
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  overflow: auto;
+  color: #ecf4df;
+  background:
+    radial-gradient(circle at 70% 10%, rgba(103, 150, 48, 0.22), transparent 35%),
+    linear-gradient(135deg, rgba(5, 8, 6, 0.98), rgba(20, 26, 20, 0.96));
+  font-family: "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
+}
+
+.army-workshop__scanlines {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.12;
+  background: repeating-linear-gradient(0deg, transparent 0 3px, #000 3px 4px);
+}
+
+.army-workshop button,
+.army-workshop input,
+.army-workshop select {
+  font: inherit;
+}
+
+.army-workshop__header {
+  position: relative;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px clamp(18px, 4vw, 56px) 18px;
+  border-bottom: 2px solid rgba(148, 223, 63, 0.5);
+  background: linear-gradient(90deg, rgba(34, 47, 31, 0.9), rgba(8, 11, 9, 0.7));
+}
+
+.army-workshop h1,
+.army-workshop h2,
+.army-workshop h3,
+.army-workshop p { margin: 0; }
+
+.army-workshop h1 {
+  color: var(--ork-lime);
+  font-size: clamp(28px, 4vw, 52px);
+  line-height: 0.95;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-shadow: 3px 3px 0 #1f4d19;
+}
+
+.army-workshop__eyebrow {
+  display: block;
+  margin-bottom: 7px;
+  color: #b3bea9;
+  font: 700 11px ui-monospace, monospace;
+  letter-spacing: 0.18em;
+}
+
+.army-workshop__world {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: #c2c9bc;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.army-workshop__world span {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #d78935;
+  box-shadow: 0 0 12px #d78935;
+}
+
+.army-workshop__world.is-ready span {
+  background: var(--ork-green);
+  box-shadow: 0 0 12px var(--ork-green);
+}
+
+.army-workshop__grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(190px, 0.7fr) minmax(440px, 2fr) minmax(240px, 0.9fr);
+  gap: 14px;
+  padding: 16px clamp(14px, 3vw, 42px) 32px;
+}
+
+.army-panel {
+  min-width: 0;
+  border: 1px solid rgba(148, 223, 63, 0.28);
+  border-top: 3px solid var(--ork-green);
+  background: var(--panel);
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.35);
+}
+
+.army-panel__title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px;
+  border-bottom: 1px solid #34412f;
+}
+
+.army-panel__title h2,
+.opponent-picker legend {
+  color: var(--ork-lime);
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.army-panel button {
+  color: inherit;
+  border: 1px solid #52634b;
+  background: #232b21;
+  cursor: pointer;
+}
+
+.army-panel button:hover:not(:disabled) { border-color: var(--ork-green); }
+.army-panel button:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.army-panel__title button { padding: 6px 9px; }
+.army-library__list { padding: 8px; }
+.army-muted { padding: 16px 8px; color: #7f8b78; }
+
+.army-library__item {
+  display: flex;
+  margin-bottom: 7px;
+  border-left: 3px solid transparent;
+  background: #191f18;
+}
+
+.army-library__item.is-active { border-left-color: var(--ork-green); background: #263322; }
+.army-library__load { flex: 1; padding: 10px; text-align: left; border: 0 !important; background: transparent !important; }
+.army-library__load strong,
+.army-library__load span { display: block; }
+.army-library__load span { margin-top: 3px; color: #9da797; font-size: 11px; }
+.army-library__delete { width: 34px; border: 0 !important; background: transparent !important; color: #bd8068 !important; }
+
+.army-roster { padding-bottom: 12px; }
+.army-roster__identity {
+  display: grid;
+  grid-template-columns: 1fr auto minmax(90px, 0.35fr);
+  gap: 12px;
+  align-items: end;
+  padding: 13px;
+  border-bottom: 1px solid #34412f;
+}
+
+.army-roster label { color: #aeb8a7; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; }
+.army-roster input,
+.opponent-picker select {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 5px;
+  padding: 8px;
+  color: #f2f6ec;
+  border: 1px solid #4c5a47;
+  background: #10150f;
+}
+
+.army-limit-toggle { display: flex; align-items: center; padding-bottom: 8px; white-space: nowrap; }
+.army-limit-toggle input { width: auto; margin: 0 7px 0 0; accent-color: var(--ork-green); }
+.unit-catalog { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; padding: 11px; }
+
+.unit-card {
+  display: grid;
+  grid-template-columns: 72px 1fr auto;
+  min-height: 94px;
+  overflow: hidden;
+  border: 1px solid #354132;
+  background: linear-gradient(110deg, #222b20, #151a14);
+}
+
+.unit-card > img { width: 72px; height: 100%; object-fit: contain; background: #0b0e0a; }
+.unit-card__body { min-width: 0; padding: 9px; }
+.unit-card__heading { display: flex; justify-content: space-between; gap: 7px; }
+.unit-card__heading h3 { color: #edf9df; font-size: 14px; }
+.unit-card__heading strong { color: var(--ork-green); font: 700 12px ui-monospace, monospace; white-space: nowrap; }
+.unit-card__body p { display: -webkit-box; overflow: hidden; margin-top: 4px; color: #929d8c; font-size: 11px; line-height: 1.25; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.unit-card__stats { display: flex; gap: 8px; margin-top: 8px; color: #c6d0be; font: 700 10px ui-monospace, monospace; }
+.unit-card__counter { display: grid; grid-template-rows: 1fr 28px 1fr; width: 35px; border-left: 1px solid #354132; }
+.unit-card__counter button { border: 0; border-radius: 0; background: #293327; }
+.unit-card__counter output { display: grid; place-items: center; color: var(--ork-lime); font-weight: 800; background: #10150f; }
+
+.army-deploy { position: sticky; top: 14px; align-self: start; padding: 14px; }
+.army-total { display: flex; align-items: end; justify-content: space-between; margin-bottom: 14px; padding-bottom: 13px; border-bottom: 1px solid #3c4838; }
+.army-total span { color: #9ba595; font-size: 12px; }
+.army-total strong { color: var(--ork-lime); font: 800 20px ui-monospace, monospace; }
+.army-total strong.is-over { color: #ff795d; }
+.army-action { width: 100%; padding: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 900 !important; }
+.army-action--secondary { margin-bottom: 17px; }
+.army-action--deploy { color: #10150f !important; border-color: #b7ef65 !important; background: linear-gradient(#c7fa76, #79bd35) !important; box-shadow: 0 0 24px rgba(148, 223, 63, 0.18); }
+.opponent-picker { display: grid; gap: 10px; margin: 0 0 16px; padding: 12px; border: 1px solid #3c4838; }
+.opponent-picker label { display: grid; grid-template-columns: auto 1fr; column-gap: 8px; color: #d6ddcf; font-size: 13px; }
+.opponent-picker input { accent-color: var(--ork-green); }
+.opponent-picker small { grid-column: 2; color: #889382; }
+.army-message { margin: 0 0 12px !important; padding: 9px; color: #d7efbe; border-left: 3px solid var(--ork-green); background: #202a1e; font-size: 12px; }
+.army-message.is-error { color: #ffd2c8; border-color: #ff6846; }
+.army-fineprint { margin-top: 11px !important; color: #778170; font-size: 10px; line-height: 1.4; }
+
+.army-workshop-return {
+  position: fixed;
+  z-index: 12;
+  top: 16px;
+  right: 16px;
+  padding: 8px 12px;
+  color: #e8f8d7;
+  border: 1px solid #8dd63d;
+  background: rgba(16, 24, 14, 0.9);
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 800;
+}
+
+@media (max-width: 1050px) {
+  .army-workshop__grid { grid-template-columns: 210px 1fr; }
+  .army-deploy { grid-column: 1 / -1; position: static; }
+}
+
+@media (max-width: 720px) {
+  .army-workshop__header {
+    align-items: start;
+    flex-direction: column;
+    padding-top: 104px;
+  }
+  .army-workshop__grid { display: flex; flex-direction: column; }
+  .army-roster__identity { grid-template-columns: 1fr; }
+  .unit-catalog { grid-template-columns: 1fr; }
+  .unit-card { grid-template-columns: 62px 1fr auto; }
+  .unit-card > img { width: 62px; }
+  .army-workshop-return { top: 90px; right: 10px; }
+}

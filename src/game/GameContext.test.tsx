@@ -8,6 +8,7 @@ import {
   WorldPolygon,
   worldBoundsForPoints,
 } from "./world";
+import { createArmy, setArmyUnitCount, UNIT_CATALOG } from "./army";
 
 const originalConsoleError = console.error;
 let consoleErrorSpy: jest.SpyInstance;
@@ -86,12 +87,30 @@ function createOpenWorld(): GameWorld {
 
 function ReadinessProbe() {
   const state = useGame();
+  const firstArmy = setArmyUnitCount(
+    createArmy("First", new Date(0), "first"),
+    UNIT_CATALOG[0].id,
+    1,
+    new Date(0)
+  );
+  const secondArmy = setArmyUnitCount(
+    createArmy("Second", new Date(0), "second"),
+    UNIT_CATALOG[1].id,
+    1,
+    new Date(0)
+  );
   return (
     <>
       <output data-testid="status">{state?.status}</output>
       <output data-testid="tick">{state?.snapshot?.tick ?? -1}</output>
       <button type="button" onClick={() => state?.setViewReady(true)}>
         ready
+      </button>
+      <button
+        type="button"
+        onClick={() => state?.startBattle({ first: firstArmy, second: secondArmy })}
+      >
+        battle
       </button>
     </>
   );
@@ -111,6 +130,8 @@ test("the simulation remains at tick zero until the view reports readiness", asy
     await Promise.resolve();
   });
 
+  expect(screen.getByTestId("status")).toHaveTextContent("army-selection");
+  fireEvent.click(screen.getByRole("button", { name: "battle" }));
   expect(screen.getByTestId("status")).toHaveTextContent("preparing-view");
   expect(screen.getByTestId("tick")).toHaveTextContent("0");
   act(() => jest.advanceTimersByTime(2_000));

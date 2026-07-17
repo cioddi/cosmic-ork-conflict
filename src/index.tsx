@@ -4,7 +4,6 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { GameProvider } from "./game/GameContext";
-import { MapComponentsProvider } from "@mapcomponents/react-maplibre";
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import {themeOptions} from "./theme";
@@ -34,11 +33,9 @@ const theme = createTheme({
 root.render(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
-      <MapComponentsProvider>
-        <GameProvider>
-          <App />
-        </GameProvider>
-      </MapComponentsProvider>
+      <GameProvider>
+        <App />
+      </GameProvider>
     </ThemeProvider>
   </React.StrictMode>
 );

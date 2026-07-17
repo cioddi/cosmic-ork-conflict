@@ -58,6 +58,9 @@ The architecture, collision guarantees, animation contract, test strategy, and
 safe adjustment points are documented in
 [`GAME_WORLD_NAVIGATION_PLAN.md`](GAME_WORLD_NAVIGATION_PLAN.md).
 
+Army construction, point balancing, local persistence validation, and match
+setup are documented in [`ARMY_BUILDER.md`](ARMY_BUILDER.md).
+
 Useful verification commands:
 
 ```sh

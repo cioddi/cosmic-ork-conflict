@@ -295,7 +295,11 @@ The MapLibre adapter publishes animated units through one shared GeoJSON source
 used by the circle, icon, and label layers. Only that source receives animation
 updates, capped at 30 frames per second, rather than serializing identical data
 through three sources on every browser frame. Selection remains a small optional
-overlay.
+overlay. Animation frames call `GeoJSONSource.setData` directly, so React renders
+once per simulation snapshot rather than once per visual frame. Frame features
+contain only the identifiers, position, display stats, and styling fields used
+by these layers; gameplay descriptions, weapons, and histories remain in the
+renderer-neutral snapshot and are not repeatedly serialized into MapLibre.
 
 ## Deterministic game engine
 

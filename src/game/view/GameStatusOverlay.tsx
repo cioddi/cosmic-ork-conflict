@@ -2,7 +2,14 @@ import { useGame } from "../GameContext";
 
 export default function GameStatusOverlay() {
   const state = useGame();
-  if (!state || state.status === "running" || state.status === "finished") return null;
+  if (
+    !state ||
+    state.status === "army-selection" ||
+    state.status === "running" ||
+    state.status === "finished"
+  ) {
+    return null;
+  }
   const message =
     state.status === "error"
       ? `Unable to create game world: ${state.error ?? "unknown error"}`
