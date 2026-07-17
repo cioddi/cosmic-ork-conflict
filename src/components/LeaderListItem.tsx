@@ -66,10 +66,11 @@ export default function FolderList(props: {
         primary={props.miniature.properties.name}
         slotProps={{
           primary: {
-            color:
-              game?.selectedMiniatureId === props.miniature.properties.id
-                ? "primary.contrastText"
-                : "primary.main",
+            sx: {
+              color: "text.primary",
+              fontWeight: 700,
+              letterSpacing: "0.01em",
+            },
           },
         }}
         secondary={
