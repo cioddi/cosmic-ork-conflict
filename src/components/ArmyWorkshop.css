@@ -34,7 +34,7 @@
   align-items: end;
   justify-content: space-between;
   gap: 24px;
-  padding: 24px clamp(18px, 4vw, 56px) 18px;
+  padding: 74px clamp(18px, 4vw, 56px) 18px;
   border-bottom: 2px solid rgba(148, 223, 63, 0.5);
   background: linear-gradient(90deg, rgba(34, 47, 31, 0.9), rgba(8, 11, 9, 0.7));
 }
@@ -268,7 +268,7 @@
   .army-workshop__header {
     align-items: start;
     flex-direction: column;
-    padding-top: 104px;
+    padding-top: 74px;
   }
   .army-workshop__grid { display: flex; flex-direction: column; }
   .army-roster__identity { grid-template-columns: 1fr; }
@@ -277,5 +277,10 @@
   .unit-card > img { width: 62px; }
   .unit-card__weapon { grid-template-columns: 1fr auto; }
   .unit-card__weapon span:last-child { grid-column: 1 / -1; }
-  .army-workshop-return { top: 90px; right: 10px; }
+  .army-workshop-return { right: 10px; }
+}
+
+@media (max-width: 380px) {
+  .army-workshop__header { padding-top: 112px; }
+  .army-workshop-return { top: 64px; right: 8px; }
 }

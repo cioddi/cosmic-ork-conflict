@@ -1,0 +1,433 @@
+.game-interface-bar {
+  --ork-green: #94df3f;
+  --ork-lime: #d8ff72;
+  --ork-rust: #e0682f;
+  --battle-panel: rgba(17, 22, 18, 0.96);
+  z-index: 20;
+  color: #ecf4df;
+  border-top: 3px solid var(--ork-green);
+  background:
+    radial-gradient(circle at 70% 0, rgba(103, 150, 48, 0.16), transparent 38%),
+    linear-gradient(110deg, rgba(24, 31, 23, 0.97), rgba(10, 14, 11, 0.98));
+  box-shadow: 0 -14px 35px rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(8px);
+  font-family: "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
+}
+
+.game-interface-bar::after {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  opacity: 0.07;
+  background: repeating-linear-gradient(0deg, transparent 0 3px, #000 3px 4px);
+}
+
+.battle-interface-panel {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  color: #ecf4df;
+  border-right: 1px solid #34412f;
+  background: var(--battle-panel);
+  overflow-x: hidden !important;
+  scrollbar-color: #52634b #10150f;
+  scrollbar-width: thin;
+}
+
+.battle-interface-panel:last-child {
+  border-right: 0;
+}
+
+.battle-panel-heading {
+  position: sticky;
+  z-index: 3;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 48px;
+  padding: 8px 12px 8px 14px;
+  border-bottom: 1px solid #34412f;
+  background: rgba(17, 22, 18, 0.97);
+}
+
+.battle-panel-heading strong,
+.battle-panel-empty strong {
+  display: block;
+  color: var(--ork-lime);
+  font-size: 14px;
+  line-height: 1.1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.battle-panel-heading__eyebrow,
+.battle-panel-empty > span {
+  display: block;
+  margin-bottom: 4px;
+  color: #84917e;
+  font: 700 8px ui-monospace, monospace;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.battle-roster-filter {
+  display: flex;
+  align-items: center;
+  color: #9ba595;
+  font: 700 9px ui-monospace, monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.battle-roster-filter__toggle.MuiCheckbox-root {
+  margin-left: 4px;
+  padding: 5px;
+  color: #879381;
+}
+
+.battle-roster-filter__toggle.Mui-checked,
+.battle-roster-filter__toggle.MuiCheckbox-root:hover {
+  color: var(--ork-green);
+}
+
+.battle-roster-list {
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow-x: hidden;
+  padding: 7px !important;
+}
+
+.battle-roster-unit.MuiListItem-root {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-height: 52px;
+  margin-bottom: 5px;
+  padding: 5px 10px;
+  border: 1px solid #354132;
+  border-left: 3px solid transparent;
+  background: linear-gradient(110deg, #20281e, #141914);
+  cursor: pointer;
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+.battle-roster-unit.MuiListItem-root:hover,
+.battle-roster-unit.MuiListItem-root:focus-visible {
+  outline: none;
+  border-color: #52634b;
+  border-left-color: var(--ork-green);
+}
+
+.battle-roster-unit.MuiListItem-root.is-selected {
+  border-color: rgba(148, 223, 63, 0.48);
+  border-left-color: var(--ork-green);
+  background: linear-gradient(110deg, #2a3825, #182017);
+  box-shadow: inset 8px 0 18px rgba(148, 223, 63, 0.06);
+}
+
+.battle-roster-unit.is-fallen {
+  opacity: 0.48;
+  filter: grayscale(0.72);
+}
+
+.battle-roster-unit .MuiListItemAvatar-root {
+  min-width: 50px;
+}
+
+.battle-roster-unit .MuiListItemText-root {
+  min-width: 0;
+}
+
+.battle-roster-unit__avatar.MuiAvatar-root {
+  width: 38px;
+  height: 38px;
+  border-radius: 0;
+  background: #0b0e0a;
+}
+
+.battle-roster-unit__name.MuiTypography-root {
+  overflow: hidden;
+  color: #edf9df;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.battle-roster-unit__meta.MuiTypography-root {
+  color: #8f9a88;
+  font: 700 9px ui-monospace, monospace;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.battle-unit-health.MuiLinearProgress-root {
+  width: 58px;
+  height: 5px;
+  margin-left: 10px;
+  border-radius: 0;
+  background: rgba(224, 104, 47, 0.38);
+}
+
+.battle-unit-health .MuiLinearProgress-bar {
+  border-radius: 0;
+  background: linear-gradient(90deg, #71ad34, var(--ork-lime));
+}
+
+.battle-selected-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.battle-selected-card.MuiCard-root {
+  flex: 0 0 auto;
+  color: #ecf4df;
+  border: 0;
+  border-bottom: 1px solid #34412f;
+  border-radius: 0;
+  background: linear-gradient(110deg, #222b20, #151a14);
+  background-image: none;
+  box-shadow: none;
+}
+
+.battle-selected-card__header.MuiCardHeader-root {
+  padding: 12px 14px 8px;
+}
+
+.battle-selected-card__avatar.MuiAvatar-root {
+  width: 56px;
+  height: 56px;
+  border: 2px solid var(--ork-green);
+  border-radius: 0;
+  background: #0b0e0a;
+}
+
+.battle-selected-card__name.MuiTypography-root {
+  color: var(--ork-lime);
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-shadow: 2px 2px 0 #1f4d19;
+}
+
+.battle-selected-card__type.MuiTypography-root {
+  color: #f0aa5a;
+  font: 700 9px ui-monospace, monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.battle-selected-card__close.MuiIconButton-root {
+  color: #879381;
+  border: 1px solid transparent;
+  border-radius: 0;
+}
+
+.battle-selected-card__close.MuiIconButton-root:hover {
+  color: var(--ork-lime);
+  border-color: #52634b;
+  background: #232b21;
+}
+
+.battle-selected-card__content.MuiCardContent-root {
+  padding: 0 14px 11px;
+}
+
+.battle-selected-card__content.MuiCardContent-root:last-child {
+  padding-bottom: 11px;
+}
+
+.battle-selected-card__description.MuiTypography-root {
+  color: #929d8c;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.battle-data-table.MuiPaper-root {
+  flex: 0 0 auto;
+  color: #dfe8d7;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  background-image: none;
+  box-shadow: none;
+}
+
+.battle-data-table .MuiTableCell-root {
+  color: #c7d0c0;
+  border-color: #34412f;
+  font-size: 11px;
+}
+
+.battle-data-table .MuiTableHead-root .MuiTableCell-root {
+  padding-top: 9px;
+  padding-bottom: 9px;
+  color: var(--ork-lime);
+  border-bottom: 1px solid rgba(148, 223, 63, 0.36);
+  background: rgba(31, 41, 29, 0.72);
+  font: 800 10px ui-monospace, monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.battle-data-table .MuiTableBody-root .MuiTableRow-root:hover {
+  background: rgba(148, 223, 63, 0.035);
+}
+
+.battle-data-table .MuiTableCell-root:last-child {
+  color: #f0f5eb;
+  font: 700 11px ui-monospace, monospace;
+}
+
+.battle-selected-weapons {
+  border-top: 1px solid #34412f;
+  background: linear-gradient(110deg, rgba(32, 40, 30, 0.78), rgba(15, 19, 15, 0.86));
+}
+
+.battle-selected-weapons__heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 9px 12px;
+  border-bottom: 1px solid #34412f;
+}
+
+.battle-selected-weapons__heading span {
+  color: #84917e;
+  font: 700 8px ui-monospace, monospace;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.battle-selected-weapons__heading strong {
+  color: var(--ork-lime);
+  font: 800 10px ui-monospace, monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.battle-selected-weapons__list {
+  display: grid;
+  gap: 5px;
+  padding: 7px;
+}
+
+.battle-selected-weapon {
+  display: grid;
+  grid-template-columns: minmax(90px, 1fr) auto auto;
+  gap: 9px;
+  align-items: center;
+  padding: 7px 9px;
+  color: #aeb9a7;
+  border: 1px solid #354132;
+  background: #151b14;
+  font: 700 9px ui-monospace, monospace;
+}
+
+.battle-selected-weapon strong {
+  overflow: hidden;
+  color: #e2eadb;
+  font: inherit;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.battle-selected-weapon span {
+  white-space: nowrap;
+}
+
+.battle-selected-weapon__damage {
+  color: #f0aa5a;
+}
+
+.battle-selected-weapons__empty {
+  margin: 0;
+  padding: 7px;
+  color: #778170;
+  font-size: 10px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.battle-player-stats {
+  border-top: 1px solid #34412f !important;
+}
+
+.battle-player-stats strong {
+  color: #edf9df;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.battle-game-panel {
+  flex-direction: column;
+}
+
+.battle-panel-empty {
+  display: grid;
+  flex: 1;
+  align-content: center;
+  justify-items: center;
+  padding: 24px;
+  text-align: center;
+}
+
+.battle-panel-empty p {
+  max-width: 240px;
+  margin: 8px 0 0;
+  color: #778170;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.battle-view-switcher {
+  --ork-green: #94df3f;
+  --ork-lime: #d8ff72;
+  position: fixed;
+  z-index: 21;
+  bottom: 30%;
+  left: 0;
+  padding: 4px 4px 0;
+  border-top: 1px solid rgba(148, 223, 63, 0.45);
+  border-right: 1px solid #34412f;
+  background: rgba(16, 21, 15, 0.96);
+}
+
+.battle-view-switcher__group .MuiToggleButton-root {
+  min-width: 42px;
+  padding: 6px 10px;
+  color: #879381;
+  border-color: #3c4838;
+  border-radius: 0;
+  background: #181f17;
+}
+
+.battle-view-switcher__group .MuiToggleButton-root:hover,
+.battle-view-switcher__group .MuiToggleButton-root.Mui-selected {
+  color: var(--ork-lime);
+  background: #293827;
+}
+
+@media (max-width: 600px) {
+  .battle-interface-panel {
+    border-right: 0;
+  }
+
+  .battle-panel-heading {
+    position: relative;
+  }
+
+  .battle-unit-health.MuiLinearProgress-root {
+    width: 72px;
+  }
+}

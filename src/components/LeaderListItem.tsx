@@ -1,4 +1,3 @@
-import * as React from "react";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
@@ -7,52 +6,39 @@ import { getUnitImageSrc } from "../game/unitAppearance";
 import { MiniatureGeoJsonFeature } from "../game/view/MapLibreSnapshotAdapter";
 import { useGame } from "../game/GameContext";
 
-import LinearProgress, {
-  linearProgressClasses,
-} from "@mui/material/LinearProgress";
-import { styled } from "@mui/material";
-
-const BorderLinearProgress = styled(LinearProgress)(({ theme }) => ({
-  width: "50px",
-  height: "5px",
-  borderRadius: "5px",
-  [`&.${linearProgressClasses.colorPrimary}`]: {
-    backgroundColor: theme.palette.error.main,
-  },
-  [`& .${linearProgressClasses.bar}`]: {
-    borderRadius: 5,
-    backgroundColor: theme.palette.success,
-  },
-}));
+import LinearProgress from "@mui/material/LinearProgress";
 
 export default function FolderList(props: {
   miniature: MiniatureGeoJsonFeature;
 }) {
   const game = useGame();
+  const isSelected =
+    game?.selectedMiniatureId === props.miniature.properties.id;
+  const isDead = props.miniature.properties.hitpoints <= 0;
   return (
     <ListItem
-      sx={{
-        padding: "0 15px",
-        cursor: "pointer",
-        backgroundColor:
-          game?.selectedMiniatureId === props.miniature.properties.id
-            ? (theme) => theme.palette.grey['600']
-            : "initial",
-      }}
+      className={`battle-roster-unit${isSelected ? " is-selected" : ""}${
+        isDead ? " is-fallen" : ""
+      }`}
+      tabIndex={0}
       onClick={() => {
         game?.setSelectedMiniatureId(props?.miniature?.properties?.id);
+      }}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          game?.setSelectedMiniatureId(props.miniature.properties.id);
+        }
       }}
     >
       <ListItemAvatar>
         <Avatar
+          className="battle-roster-unit__avatar"
           sx={{
             border:
               "2px solid " +
               game?.game?.players[props.miniature.properties.playerId - 1]
                 .color,
-            backgroundColor: "grey.main",
-            display: "flex",
-            flexDirection: "column",
           }}
         >
           <img
@@ -66,21 +52,18 @@ export default function FolderList(props: {
         primary={props.miniature.properties.name}
         slotProps={{
           primary: {
-            sx: {
-              color: "text.primary",
-              fontWeight: 700,
-              letterSpacing: "0.01em",
-            },
+            className: "battle-roster-unit__name",
+          },
+          secondary: {
+            className: "battle-roster-unit__meta",
           },
         }}
-        secondary={
-          "Kills: " +
-          props.miniature.properties.killCount +
-          " " +
-          (props.miniature.properties.hitpoints > 0 ? "" : "(*dead*)")
-        }
+        secondary={`${props.miniature.properties.killCount} kills${
+          isDead ? " · fallen" : ""
+        }`}
       />
-      <BorderLinearProgress
+      <LinearProgress
+        className="battle-unit-health"
         variant="determinate"
         value={
           props?.miniature?.properties?.initialHitpoints

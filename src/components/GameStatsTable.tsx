@@ -48,7 +48,7 @@ export default function GameStatsTable() {
   const stats = React.useMemo(() => {
     const stats: {
       round: number;
-      winner: number | undefined;
+      winner: string | undefined;
       players: PlayerStatsType[];
     } = {
       round: 0,
@@ -58,7 +58,9 @@ export default function GameStatsTable() {
 
     if (game?.game && typeof game.geojson !== "undefined") {
       stats.round = game.game.round;
-      stats.winner = game.game.winner;
+      stats.winner = game.game.players.find(
+        (player) => player.id === game.game?.winner
+      )?.name;
       for (let i = 0; i < game.game.players.length; i++) {
         stats.players.push(getPlayerStats(game.game.players[i], game.geojson));
       }
@@ -68,12 +70,15 @@ export default function GameStatsTable() {
   }, [game]);
   return (
     <>
-      <TableContainer component={Paper}>
-        <Table aria-label="simple table">
+      <TableContainer
+        className="battle-data-table battle-stats-summary"
+        component={Paper}
+      >
+        <Table aria-label="Battle summary">
           <TableHead>
             <TableRow>
-              <TableCell>Game stats</TableCell>
-              <TableCell align="right">value</TableCell>
+              <TableCell>Battle telemetry</TableCell>
+              <TableCell align="right">Value</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -82,7 +87,7 @@ export default function GameStatsTable() {
               sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
             >
               <TableCell component="th" scope="row">
-                turn
+                Round
               </TableCell>
 
               <TableCell align="right">{stats.round}</TableCell>
@@ -92,18 +97,21 @@ export default function GameStatsTable() {
               sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
             >
               <TableCell component="th" scope="row">
-                winner
+                Victor
               </TableCell>
 
               <TableCell align="right">
-                {stats.winner ? "Player " + stats.winner : ""}
+                {stats.winner ?? "—"}
               </TableCell>
             </TableRow>
           </TableBody>
         </Table>
       </TableContainer>
-      <TableContainer component={Paper}>
-        <Table aria-label="simple table">
+      <TableContainer
+        className="battle-data-table battle-player-stats"
+        component={Paper}
+      >
+        <Table aria-label="Player statistics">
           <TableBody>
             {stats.players.map((el, idx) => [
               <TableRow
@@ -112,31 +120,35 @@ export default function GameStatsTable() {
               >
                 <TableCell
                   scope="row"
-                  sx={{ display: "flex", alignItems: "center", padding:'5px 16px' }}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    padding: "5px 16px",
+                  }}
                 >
                   <Avatar
                     sx={{
                       width: "10px",
                       height: "10px",
                       backgroundColor: el.player.color,
-                      marginRight: "5px",
+                      marginRight: "7px",
                     }}
                   >
                     &nbsp;
                   </Avatar>
-                  <strong>Player {el.id}</strong>
+                  <strong>{el.player.name}</strong>
                 </TableCell>
 
-                <TableCell 
-                  sx={{ padding:'5px 16px' }}
-                align="right">&nbsp;</TableCell>
+                <TableCell sx={{ padding: "5px 16px" }} align="right">
+                  &nbsp;
+                </TableCell>
               </TableRow>,
               <TableRow
                 key={"kills_row" + idx}
                 sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
               >
                 <TableCell scope="row">
-                  kills
+                  Kills
                 </TableCell>
 
                 <TableCell align="right">{el.killCount}</TableCell>
@@ -146,7 +158,7 @@ export default function GameStatsTable() {
                 sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
               >
                 <TableCell scope="row">
-                  units left
+                  Units left
                 </TableCell>
 
                 <TableCell align="right">{el.livingUnitCount}</TableCell>
@@ -156,7 +168,7 @@ export default function GameStatsTable() {
                 sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
               >
                 <TableCell scope="row">
-                  total damage
+                  Total damage
                 </TableCell>
 
                 <TableCell align="right">{el.damageDealt}</TableCell>

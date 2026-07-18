@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Box,
   Checkbox,
@@ -20,6 +20,7 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import CasinoIcon from "@mui/icons-material/Casino";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
+import "./GameInterface.css";
 
 export default function GameInterface() {
   const theme = useTheme();
@@ -42,32 +43,33 @@ export default function GameInterface() {
   }, [game, hideTheDead]);
 
   useEffect(() => {
-    if(!game?.selectedMiniatureId)return;
+    if (!game?.selectedMiniatureId) return;
 
-    setSelectedView('selected');
-  },[game?.selectedMiniatureId])
+    setSelectedView("selected");
+  }, [game?.selectedMiniatureId]);
 
   return (
     <>
       {matchesXs && (
-        <Box sx={{ position: "fixed", bottom: "30%" }}>
+        <Box className="battle-view-switcher">
           <ToggleButtonGroup
+            className="battle-view-switcher__group"
             value={selectedView}
             exclusive
-            onChange={(ev, val) => {
-              setSelectedView(val);
+            onChange={(_event, val) => {
+              if (val) setSelectedView(val);
             }}
-            aria-label="text alignment"
+            aria-label="Battle information view"
           >
-            <ToggleButton value="units" aria-label="left aligned">
+            <ToggleButton value="units" aria-label="Show combat roster">
               <FormatListBulletedIcon />
             </ToggleButton>
-            {game?.selectedMiniature && 
-              <ToggleButton value="selected" aria-label="centered">
+            {game?.selectedMiniature && (
+              <ToggleButton value="selected" aria-label="Show selected unit">
                 <SmartToyIcon />
               </ToggleButton>
-            }
-            <ToggleButton value="game" aria-label="right aligned">
+            )}
+            <ToggleButton value="game" aria-label="Show battle stats">
               <CasinoIcon />
             </ToggleButton>
           </ToggleButtonGroup>
@@ -83,12 +85,12 @@ export default function GameInterface() {
           bottom: 0,
           width: "100%",
           boxSizing: "border-box",
-          bgcolor: "background.paper",
           height: "30%",
           overflow: matchesXs ? "auto" : "hidden",
         }}
       >
         <Grid
+          className="battle-interface-panel"
           size={{ sm: 4, xs: 12 }}
           sx={{
             ...(matchesXs
@@ -98,33 +100,46 @@ export default function GameInterface() {
             overflow: matchesXs ? "initial" : "auto",
           }}
         >
-          <Box>
-            <Checkbox
-              slotProps={{ input: { "aria-label": "hide the dead" } }}
-              icon={<VisibilityIcon />}
-              checkedIcon={<VisibilityOffIcon />}
-              onClick={() => {
-                setHideTheDead((val) => !val);
-              }}
-            />
+          <Box className="battle-panel-heading">
+            <div>
+              <span className="battle-panel-heading__eyebrow">Field command</span>
+              <strong>Combat roster</strong>
+            </div>
+            <label className="battle-roster-filter">
+              <span>Hide fallen</span>
+              <Checkbox
+                className="battle-roster-filter__toggle"
+                size="small"
+                slotProps={{ input: { "aria-label": "hide the dead" } }}
+                icon={<VisibilityIcon />}
+                checkedIcon={<VisibilityOffIcon />}
+                onClick={() => {
+                  setHideTheDead((val) => !val);
+                }}
+              />
+            </label>
           </Box>
 
-          <List sx={{ width: "100%", padding: 0 }}>
-            {leaders.map((el: any, idx: number) => (
+          <List
+            className="battle-roster-list"
+            sx={{ width: "100%", padding: 0 }}
+          >
+            {leaders.map((leader) => (
               <LeaderListItem
-                key={"item" + idx}
-                miniature={el}
-              ></LeaderListItem>
+                key={leader.properties.id}
+                miniature={leader}
+              />
             ))}
           </List>
         </Grid>
         <Grid
+          className="battle-interface-panel battle-selected-panel"
           size={{ sm: 4, xs: 12 }}
           sx={{
             ...(matchesXs
               ? { display: selectedView === "selected" ? "block" : "none" }
               : {}),
-            flexDirection: 'column',
+            flexDirection: "column",
             height: "100%",
             overflow: "auto",
           }}
@@ -138,8 +153,16 @@ export default function GameInterface() {
               <SelectedMiniatureStatsTable miniature={game.selectedMiniature} />
             </>
           )}
+          {!game?.selectedMiniature && (
+            <div className="battle-panel-empty">
+              <span>Unit telemetry</span>
+              <strong>No unit selected</strong>
+              <p>Select a unit on the map or from the combat roster.</p>
+            </div>
+          )}
         </Grid>
         <Grid
+          className="battle-interface-panel battle-game-panel"
           size={{ sm: 4, xs: 12 }}
           sx={{
             display: "flex",

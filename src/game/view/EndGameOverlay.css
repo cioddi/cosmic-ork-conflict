@@ -1,0 +1,293 @@
+.endgame-overlay {
+  --ork-green: #94df3f;
+  --ork-lime: #d8ff72;
+  --ork-rust: #e0682f;
+  position: fixed;
+  z-index: 1200;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: clamp(16px, 4vw, 54px);
+  box-sizing: border-box;
+  color: #ecf4df;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(148, 223, 63, 0.2), transparent 32%),
+    radial-gradient(circle at 12% 82%, rgba(224, 104, 47, 0.14), transparent 28%),
+    rgba(4, 7, 5, 0.88);
+  backdrop-filter: blur(7px) saturate(0.72);
+  font-family: "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
+}
+
+.endgame-overlay::before {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  background: conic-gradient(
+    from 20deg at 50% 45%,
+    transparent 0 12%,
+    rgba(148, 223, 63, 0.055) 13%,
+    transparent 15% 38%,
+    rgba(224, 104, 47, 0.04) 39%,
+    transparent 42% 100%
+  );
+}
+
+.endgame-overlay__scanlines {
+  position: fixed;
+  z-index: 3;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.12;
+  background: repeating-linear-gradient(0deg, transparent 0 3px, #000 3px 4px);
+}
+
+.endgame-report {
+  position: relative;
+  z-index: 2;
+  width: min(980px, 100%);
+  max-height: calc(100dvh - 32px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  border: 1px solid rgba(148, 223, 63, 0.34);
+  border-top: 4px solid var(--ork-green);
+  background: rgba(17, 22, 18, 0.97);
+  box-shadow:
+    0 0 55px rgba(148, 223, 63, 0.1),
+    0 30px 80px rgba(0, 0, 0, 0.68);
+  scrollbar-width: none;
+}
+
+.endgame-report::-webkit-scrollbar {
+  display: none;
+}
+
+.endgame-report::after {
+  position: absolute;
+  top: -4px;
+  right: 0;
+  width: 28%;
+  height: 4px;
+  content: "";
+  background: var(--ork-rust);
+  box-shadow: 0 0 22px rgba(224, 104, 47, 0.5);
+}
+
+.endgame-report__header {
+  padding: clamp(20px, 4vw, 38px);
+  border-bottom: 1px solid #34412f;
+  background:
+    linear-gradient(90deg, rgba(35, 49, 31, 0.92), rgba(8, 11, 9, 0.65)),
+    repeating-linear-gradient(120deg, transparent 0 20px, rgba(148, 223, 63, 0.025) 20px 21px);
+}
+
+.endgame-report__header > span {
+  display: block;
+  margin-bottom: 8px;
+  color: #aeb8a7;
+  font: 700 10px ui-monospace, monospace;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.endgame-report__header h1 {
+  margin: 0;
+  color: var(--ork-lime);
+  font-size: clamp(32px, 6vw, 68px);
+  line-height: 0.9;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+  text-shadow:
+    3px 3px 0 #1f4d19,
+    0 0 28px rgba(148, 223, 63, 0.2);
+}
+
+.endgame-report__header p {
+  margin: 12px 0 0;
+  color: #929d8c;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+.endgame-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  border-bottom: 1px solid #34412f;
+}
+
+.endgame-stat-grid > div {
+  padding: 14px 16px;
+  border-right: 1px solid #34412f;
+  background: #111612;
+}
+
+.endgame-stat-grid > div:last-child {
+  border-right: 0;
+}
+
+.endgame-stat-grid span,
+.endgame-performer__identity > span,
+.endgame-performer dt {
+  display: block;
+  color: #84917e;
+  font: 700 8px ui-monospace, monospace;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.endgame-stat-grid strong {
+  display: block;
+  margin-top: 5px;
+  color: #edf9df;
+  font: 900 22px ui-monospace, monospace;
+}
+
+.endgame-performers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 14px;
+}
+
+.endgame-performer {
+  position: relative;
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr);
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #354132;
+  border-left: 3px solid var(--ork-green);
+  background: linear-gradient(110deg, #222b20, #131813);
+}
+
+.endgame-performer--worst {
+  border-left-color: var(--ork-rust);
+}
+
+.endgame-performer__badge {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  right: 0;
+  padding: 4px 7px;
+  color: #10150f;
+  background: var(--ork-green);
+  font: 900 8px ui-monospace, monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.endgame-performer--worst .endgame-performer__badge {
+  color: #fff1e9;
+  background: #9d4824;
+}
+
+.endgame-performer > img {
+  grid-row: 1 / 3;
+  width: 82px;
+  height: 100%;
+  min-height: 128px;
+  object-fit: contain;
+  background: #0b0e0a;
+}
+
+.endgame-performer__identity {
+  min-width: 0;
+  padding: 16px 14px 8px;
+}
+
+.endgame-performer__identity strong {
+  display: block;
+  overflow: hidden;
+  margin-top: 4px;
+  color: #edf9df;
+  font-size: 17px;
+  letter-spacing: 0.05em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.endgame-performer__identity p {
+  margin: 3px 0 0;
+  color: #929d8c;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.endgame-performer dl {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: 0;
+  border-top: 1px solid #354132;
+}
+
+.endgame-performer dl > div {
+  min-width: 0;
+  padding: 8px 10px;
+  border-right: 1px solid #354132;
+}
+
+.endgame-performer dl > div:last-child {
+  border-right: 0;
+}
+
+.endgame-performer dd {
+  overflow: hidden;
+  margin: 4px 0 0;
+  color: #f0f5eb;
+  font: 800 11px ui-monospace, monospace;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.endgame-report__footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 14px;
+  border-top: 1px solid #34412f;
+  background: #0e130e;
+}
+
+.endgame-report__footer button {
+  min-width: 250px;
+  padding: 12px 18px;
+  color: #10150f;
+  border: 1px solid #b7ef65;
+  background: linear-gradient(#c7fa76, #79bd35);
+  box-shadow: 0 0 26px rgba(148, 223, 63, 0.2);
+  font: 900 12px "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.endgame-report__footer button:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 0 34px rgba(148, 223, 63, 0.32);
+}
+
+@media (max-width: 720px) {
+  .endgame-overlay {
+    place-items: start center;
+    padding: 14px;
+  }
+
+  .endgame-stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .endgame-stat-grid > div {
+    border-bottom: 1px solid #34412f;
+  }
+
+  .endgame-performers {
+    grid-template-columns: 1fr;
+  }
+
+  .endgame-report__footer button {
+    width: 100%;
+  }
+}

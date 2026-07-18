@@ -12,10 +12,15 @@ import CombatEffects from "./view/CombatEffects";
 import { useMapLibreMap } from "./view/MapLibreView";
 
 const GAME_UNITS_SOURCE_ID = "game-units";
+const SELECTED_UNIT_LAYER_IDS = [
+  "selected-miniature-glow",
+  "selected-miniature-indicator",
+] as const;
 const GAME_LAYER_IDS = [
+  "game-unit-base-shadow",
   "game-unit-circles",
   "game-unit-icons",
-  "selected-miniature-indicator",
+  ...SELECTED_UNIT_LAYER_IDS,
   "game-unit-labels",
 ] as const;
 const UNIT_CIRCLE_RADIUS = [
@@ -92,6 +97,21 @@ export default function GameDataLayers() {
           data: { type: "FeatureCollection", features: [] },
         });
       }
+      if (!map.getLayer("game-unit-base-shadow")) {
+        map.addLayer({
+          id: "game-unit-base-shadow",
+          type: "circle",
+          source: GAME_UNITS_SOURCE_ID,
+          paint: {
+            "circle-radius": UNIT_CIRCLE_RADIUS,
+            "circle-color": "rgba(0,0,0,0)",
+            "circle-opacity": 0,
+            "circle-stroke-color": "#05080c",
+            "circle-stroke-width": 5,
+            "circle-stroke-opacity": ["case", [">", ["get", "hitpoints"], 0], 0.38, 0],
+          },
+        });
+      }
       if (!map.getLayer("game-unit-circles")) {
         map.addLayer({
           id: "game-unit-circles",
@@ -100,10 +120,10 @@ export default function GameDataLayers() {
           paint: {
             "circle-radius": UNIT_CIRCLE_RADIUS,
             "circle-stroke-color": playerColorExpression,
-            "circle-stroke-width": 2,
+            "circle-stroke-width": 1.5,
             "circle-color": "rgba(0,0,0,0)",
-            "circle-opacity": ["case", [">", ["get", "hitpoints"], 0], 0.4, 0.2],
-            "circle-stroke-opacity": ["case", [">", ["get", "hitpoints"], 0], 0.8, 0.2],
+            "circle-opacity": 0,
+            "circle-stroke-opacity": ["case", [">", ["get", "hitpoints"], 0], 0.5, 0],
           },
         });
       }
@@ -123,6 +143,23 @@ export default function GameDataLayers() {
           },
         });
       }
+      if (!map.getLayer("selected-miniature-glow")) {
+        map.addLayer({
+          id: "selected-miniature-glow",
+          type: "circle",
+          source: GAME_UNITS_SOURCE_ID,
+          filter: ["==", ["get", "id"], ""],
+          paint: {
+            "circle-radius": SELECTED_CIRCLE_RADIUS,
+            "circle-color": "rgba(0,0,0,0)",
+            "circle-opacity": 0,
+            "circle-stroke-width": 9,
+            "circle-stroke-color": "#69c6ff",
+            "circle-stroke-opacity": 0.2,
+            "circle-blur": 0.6,
+          },
+        });
+      }
       if (!map.getLayer("selected-miniature-indicator")) {
         map.addLayer({
           id: "selected-miniature-indicator",
@@ -133,8 +170,9 @@ export default function GameDataLayers() {
             "circle-radius": SELECTED_CIRCLE_RADIUS,
             "circle-opacity": 0,
             "circle-color": "rgba(0,0,0,0)",
-            "circle-stroke-width": 4,
-            "circle-stroke-color": "#b4ddff",
+            "circle-stroke-width": 2,
+            "circle-stroke-color": "#d7efff",
+            "circle-stroke-opacity": 0.9,
           },
         });
       }
@@ -208,9 +246,11 @@ export default function GameDataLayers() {
   }, [map, iconsReady, playerColorExpression, setSelectedMiniatureId]);
 
   useEffect(() => {
-    if (!map?.getLayer("selected-miniature-indicator")) return;
-    map.setFilter("selected-miniature-indicator", selectedMiniatureFilter);
-  }, [map, selectedMiniatureFilter]);
+    if (!map || !layersReady) return;
+    for (const layerId of SELECTED_UNIT_LAYER_IDS) {
+      if (map.getLayer(layerId)) map.setFilter(layerId, selectedMiniatureFilter);
+    }
+  }, [map, layersReady, selectedMiniatureFilter]);
 
   useEffect(() => {
     if (!map || !layersReady || !renderedGeojson) return;

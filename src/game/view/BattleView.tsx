@@ -6,6 +6,7 @@ import GameDataLayers from "../GameDataLayers";
 import GameStatusOverlay from "./GameStatusOverlay";
 import { MapLibreView } from "./MapLibreView";
 import MapSelectionCamera from "./MapSelectionCamera";
+import EndGameOverlay from "./EndGameOverlay";
 
 const theme = createTheme(themeOptions);
 
@@ -25,6 +26,7 @@ export default function BattleView() {
       </MapLibreView>
       <GameStatusOverlay />
       <GameInterface />
+      <EndGameOverlay />
     </ThemeProvider>
   );
 }

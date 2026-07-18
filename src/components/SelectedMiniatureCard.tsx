@@ -5,7 +5,6 @@ import { MiniatureGeoJsonFeature } from "../game/view/MapLibreSnapshotAdapter";
 import { getUnitImageSrc } from "../game/unitAppearance";
 import { MiniatureType } from "../game/classes/Miniature";
 import { Avatar, CardHeader, IconButton } from "@mui/material";
-import { red } from "@mui/material/colors";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import { useGame } from "../game/GameContext";
 
@@ -13,19 +12,20 @@ export default function SelectedMiniatureCard(props: {
   miniature: MiniatureGeoJsonFeature;
 }) {
   const game = useGame();
+  const playerColor =
+    game?.game?.players[props.miniature.properties.playerId - 1]?.color;
 
   return (
-    <Card sx={{ width: "100%" }}>
+    <Card className="battle-selected-card" sx={{ width: "100%" }}>
       <CardHeader
+        className="battle-selected-card__header"
         avatar={
           <Avatar
+            className="battle-selected-card__avatar"
             sx={{
-              bgcolor: red[500],
-              width: "60px",
-              height: "60px",
-              backgroundColor: "grey.main",
+              borderColor: playerColor,
             }}
-            aria-label="recipe"
+            aria-label={`${props.miniature.properties.name} portrait`}
           >
             <img
               style={{ width: "100%" }}
@@ -41,10 +41,14 @@ export default function SelectedMiniatureCard(props: {
           (props.miniature.properties.hitpoints > 0 ? "" : "(*dead*)")
         }
         titleTypographyProps={{
-          color: "primary.main",
+          className: "battle-selected-card__name",
+        }}
+        subheaderTypographyProps={{
+          className: "battle-selected-card__type",
         }}
         action={
           <IconButton
+            className="battle-selected-card__close"
             aria-label="deselect"
             onClick={() => game?.setSelectedMiniatureId(undefined)}
           >
@@ -52,8 +56,8 @@ export default function SelectedMiniatureCard(props: {
           </IconButton>
         }
       />
-      <CardContent>
-        <Typography variant="body2" color="text.secondary">
+      <CardContent className="battle-selected-card__content">
+        <Typography className="battle-selected-card__description" variant="body2">
           {props.miniature.properties.description}
         </Typography>
       </CardContent>
