@@ -1,5 +1,5 @@
 import GameLog from "./GameLog";
-import Miniature, { MiniatureOptions } from "./Miniature";
+import Miniature, { MiniatureOptions, WeaponInterface } from "./Miniature";
 import { PlayerInterface } from "./Player";
 import { GridNavigation } from "../navigation/GridNavigation";
 import { GameWorld, WorldPoint, distance, interpolate } from "../world";
@@ -16,6 +16,18 @@ export interface MovementTrace {
   startedAtTick: number;
 }
 
+export interface CombatTrace {
+  id: string;
+  attackerId: string;
+  targetId: string;
+  kind: "melee" | "ranged";
+  start: WorldPoint;
+  end: WorldPoint;
+  hit: boolean;
+  damage: number;
+  startedAtTick: number;
+}
+
 export interface UnitSnapshot {
   playerId: number;
   position: WorldPoint;
@@ -26,6 +38,7 @@ export interface GameSnapshot {
   tick: number;
   units: UnitSnapshot[];
   movementTraces: MovementTrace[];
+  combatTraces: CombatTrace[];
 }
 
 export type MovementResult =
@@ -49,6 +62,7 @@ export default class Game {
 
   private tick = 0;
   private movementTraces: MovementTrace[] = [];
+  private combatTraces: CombatTrace[] = [];
 
   constructor(
     players: PlayerInterface[],
@@ -66,6 +80,7 @@ export default class Game {
   beginStep(): void {
     this.tick++;
     this.movementTraces = [];
+    this.combatTraces = [];
   }
 
   switchPlayers(): void {
@@ -294,15 +309,24 @@ export default class Game {
     return Math.floor(this.random() * 6) + 1;
   }
 
-  melee(player: PlayerInterface, attacker: Miniature, defender: Miniature): void {
+  melee(
+    player: PlayerInterface,
+    attacker: Miniature,
+    defender: Miniature,
+    weapon: WeaponInterface = this.getDefaultWeapon(attacker, "melee")
+  ): void {
     const attackRoll = this.roll();
     let damage = Math.max(
       0,
-      attackRoll + attacker.state.meleeAttack - defender.state.armour
+      attackRoll +
+        attacker.state.meleeAttack +
+        weapon.damage -
+        defender.state.armour
     );
     if (attackRoll === 1) damage = 0;
     defender.takeDamage(damage);
     attacker.state.damageDealt += damage;
+    this.recordCombatTrace("melee", attacker, defender, damage > 0, damage);
     if (defender.state.id && defender.state.hitpoints <= 0) {
       attacker.state.killCount++;
       attacker.state.unitsKilled.push(defender.state.id);
@@ -318,12 +342,20 @@ export default class Game {
     });
   }
 
-  ranged(player: PlayerInterface, attacker: Miniature, defender: Miniature): void {
+  ranged(
+    player: PlayerInterface,
+    attacker: Miniature,
+    defender: Miniature,
+    weapon: WeaponInterface = this.getDefaultWeapon(attacker, "ranged")
+  ): void {
     const attackRoll = this.roll();
     const hit = attackRoll >= attacker.state.rangeAttack;
-    const damage = hit ? Math.max(0, attackRoll - defender.state.armour) : 0;
+    const damage = hit
+      ? Math.max(0, attackRoll + weapon.damage - defender.state.armour)
+      : 0;
     defender.takeDamage(damage);
     attacker.state.damageDealt += damage;
+    this.recordCombatTrace("ranged", attacker, defender, hit, damage);
     if (defender.state.id && defender.state.hitpoints <= 0) {
       attacker.state.killCount++;
       attacker.state.unitsKilled.push(defender.state.id);
@@ -342,6 +374,11 @@ export default class Game {
   getSnapshot(): GameSnapshot {
     return {
       tick: this.tick,
+      combatTraces: this.combatTraces.map((trace) => ({
+        ...trace,
+        start: [...trace.start],
+        end: [...trace.end],
+      })),
       movementTraces: this.movementTraces.map((trace) => ({
         ...trace,
         points: trace.points.map((point) => [...point]),
@@ -360,6 +397,43 @@ export default class Game {
         }))
       ),
     };
+  }
+
+  private getDefaultWeapon(
+    attacker: Miniature,
+    kind: "melee" | "ranged"
+  ): WeaponInterface {
+    const matching = attacker.state.weapons.find((weapon) =>
+      kind === "ranged"
+        ? weapon.range > this.rules.closeCombatRangeMeters
+        : weapon.range <= this.rules.closeCombatRangeMeters
+    );
+    return matching ?? attacker.state.weapons[0] ?? {
+      name: "Unarmed",
+      description: "An improvised attack.",
+      damage: 0,
+      range: this.rules.closeCombatRangeMeters,
+    };
+  }
+
+  private recordCombatTrace(
+    kind: CombatTrace["kind"],
+    attacker: Miniature,
+    defender: Miniature,
+    hit: boolean,
+    damage: number
+  ): void {
+    this.combatTraces.push({
+      id: `combat-${this.tick}-${this.combatTraces.length}`,
+      attackerId: attacker.state.id ?? "unknown-attacker",
+      targetId: defender.state.id ?? "unknown-target",
+      kind,
+      start: [...attacker.state.position],
+      end: [...defender.state.position],
+      hit,
+      damage,
+      startedAtTick: this.tick,
+    });
   }
 }
 

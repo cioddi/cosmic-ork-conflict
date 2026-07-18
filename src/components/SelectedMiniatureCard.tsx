@@ -2,7 +2,7 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import { MiniatureGeoJsonFeature } from "../game/view/MapLibreSnapshotAdapter";
-import { getImageSrcFromProps } from "../game/GameDataLayers";
+import { getUnitImageSrc } from "../game/unitAppearance";
 import { MiniatureType } from "../game/classes/Miniature";
 import { Avatar, CardHeader, IconButton } from "@mui/material";
 import { red } from "@mui/material/colors";
@@ -29,7 +29,7 @@ export default function SelectedMiniatureCard(props: {
           >
             <img
               style={{ width: "100%" }}
-              src={getImageSrcFromProps(props.miniature.properties)}
+              src={getUnitImageSrc(props.miniature.properties)}
               alt={props.miniature.properties.description}
             />
           </Avatar>

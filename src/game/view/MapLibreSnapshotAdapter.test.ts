@@ -30,6 +30,7 @@ test("clamps trace samples and reports segment bearing", () => {
 test("creates a minimal animation payload without gameplay-only properties", () => {
   const snapshot: GameSnapshot = {
     tick: 0,
+    combatTraces: [],
     movementTraces: [],
     units: [
       {

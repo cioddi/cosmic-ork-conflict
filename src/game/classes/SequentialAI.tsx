@@ -1,6 +1,6 @@
 import { CSSProperties } from "react";
 import Game from "./Game";
-import Miniature from "./Miniature";
+import Miniature, { WeaponInterface } from "./Miniature";
 import { PlayerInterface } from "./Player";
 
 export default class SequentialAI implements PlayerInterface {
@@ -57,40 +57,22 @@ export default class SequentialAI implements PlayerInterface {
   playRound(game: Game): void {
     const availableMinis = game.getAvailableMinis(this.miniatures);
     availableMinis.forEach((mini) => {
-      let plan = game.getNearestReachableEnemyPlan(mini, this);
-      let enemyMini = plan?.enemy ?? game.getNearestEnemy(mini, this);
+      const plan = game.getNearestReachableEnemyPlan(mini, this);
+      const enemyMini = plan?.enemy ?? game.getNearestEnemy(mini, this);
       if (!enemyMini) return;
 
-      let { distance } = game.getDistanceAndBearing(mini, enemyMini);
-      const usableWeapon = mini.state.weapons
-        .filter((weapon) => {
-          const effectiveRange =
-            weapon.range <= game.rules.closeCombatRangeMeters
-              ? game.rules.closeCombatRangeMeters
-              : weapon.range;
-          return distance <= effectiveRange;
-        })
-        .sort((left, right) => right.range - left.range)[0];
+      const preferredWeapon = this.getPreferredWeapon(game, mini);
+      const preferredRange = preferredWeapon
+        ? Math.max(preferredWeapon.range, game.rules.closeCombatRangeMeters)
+        : game.rules.closeCombatRangeMeters;
+      const distance = game.getDistanceAndBearing(mini, enemyMini).distance;
 
-      if (usableWeapon) {
-        if (usableWeapon.range > game.rules.closeCombatRangeMeters) {
-          game.ranged(this, mini, enemyMini);
-        } else {
-          game.melee(this, mini, enemyMini);
-        }
-      }
-
-      if (enemyMini.state.hitpoints <= 0) {
-        plan = game.getNearestReachableEnemyPlan(mini, this);
-        enemyMini = plan?.enemy ?? game.getNearestEnemy(mini, this);
-        if (!enemyMini) return;
-        distance = game.getDistanceAndBearing(mini, enemyMini).distance;
-      }
-
-      if (enemyMini.state.hitpoints > 0 && distance > game.rules.closeCombatRangeMeters) {
+      // Advance only as far as the selected weapon needs. Ranged units now
+      // maintain firing distance instead of charging into close combat.
+      if (distance > preferredRange) {
         const movementBudget = Math.min(
           mini.state.speed * game.rules.movementDistanceMultiplier,
-          distance - game.rules.closeCombatRangeMeters
+          distance - preferredRange
         );
         if (movementBudget > 0) {
           game.moveMiniatureToward(
@@ -102,8 +84,42 @@ export default class SequentialAI implements PlayerInterface {
           );
         }
       }
+
+      const distanceAfterMovement = game.getDistanceAndBearing(mini, enemyMini).distance;
+      const usableWeapon = this.getUsableWeapon(game, mini, distanceAfterMovement);
+      if (!usableWeapon || enemyMini.state.hitpoints <= 0) return;
+      if (usableWeapon.range > game.rules.closeCombatRangeMeters) {
+        game.ranged(this, mini, enemyMini, usableWeapon);
+      } else {
+        game.melee(this, mini, enemyMini, usableWeapon);
+      }
     });
 
     game.switchPlayers();
+  }
+
+  private getPreferredWeapon(
+    game: Game,
+    miniature: Miniature
+  ): WeaponInterface | undefined {
+    return [...miniature.state.weapons].sort(
+      (left, right) =>
+        Math.max(right.range, game.rules.closeCombatRangeMeters) -
+          Math.max(left.range, game.rules.closeCombatRangeMeters) ||
+        right.damage - left.damage
+    )[0];
+  }
+
+  private getUsableWeapon(
+    game: Game,
+    miniature: Miniature,
+    distance: number
+  ): WeaponInterface | undefined {
+    return miniature.state.weapons
+      .filter(
+        (weapon) =>
+          distance <= Math.max(weapon.range, game.rules.closeCombatRangeMeters)
+      )
+      .sort((left, right) => right.damage - left.damage || right.range - left.range)[0];
   }
 }

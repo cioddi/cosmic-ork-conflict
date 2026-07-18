@@ -80,7 +80,8 @@ function createArmyUnit(
   if (!entry) throw new Error(`Unknown unit catalogue id: ${unitId}`);
   const template = entry.template;
   const mobilityProfileId =
-    template.type === MiniatureType.VEHICLE ? "vehicle" : "infantry";
+    template.mobilityProfileId ??
+    (template.type === MiniatureType.VEHICLE ? "vehicle" : "infantry");
   return new Miniature({
     ...template,
     mobilityProfileId,

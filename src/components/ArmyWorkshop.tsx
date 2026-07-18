@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { MiniatureType } from "../game/classes/Miniature";
 import {
   ArmyDefinition,
   DEFAULT_POINT_LIMIT,
@@ -16,6 +15,8 @@ import {
   upsertArmy,
 } from "../game/army";
 import { useGame } from "../game/GameContext";
+import { DEFAULT_GAME_RULES } from "../game/rules";
+import { getUnitImageSrc } from "../game/unitAppearance";
 import "./ArmyWorkshop.css";
 
 type OpponentMode = "random" | "saved";
@@ -26,15 +27,6 @@ function loadSavedArmies(): ArmyDefinition[] {
   } catch {
     return [];
   }
-}
-
-function unitImage(entry: (typeof UNIT_CATALOG)[number]): string {
-  if (entry.template.image) return entry.template.image;
-  return entry.template.type === MiniatureType.VEHICLE
-    ? "assets/vehicle.png"
-    : entry.template.type === MiniatureType.CHARACTER
-    ? "assets/character.png"
-    : "assets/infantry.png";
 }
 
 export default function ArmyWorkshop() {
@@ -219,10 +211,13 @@ export default function ArmyWorkshop() {
               const count = draft.unitCounts[entry.id] ?? 0;
               return (
                 <article className="unit-card" key={entry.id}>
-                  <img src={unitImage(entry)} alt="" />
+                  <img src={getUnitImageSrc(entry.template)} alt="" />
                   <div className="unit-card__body">
                     <div className="unit-card__heading">
-                      <h3>{entry.template.name}</h3>
+                      <h3>
+                        {entry.template.name}
+                        {entry.maxPerArmy === 1 && <small>Unique</small>}
+                      </h3>
                       <strong>{entry.points} pts</strong>
                     </div>
                     <p>{entry.template.description}</p>
@@ -230,6 +225,31 @@ export default function ArmyWorkshop() {
                       <span>HP {entry.template.hitpoints}</span>
                       <span>ARM {entry.template.armour}</span>
                       <span>SPD {entry.template.speed}</span>
+                    </div>
+                    <div
+                      className="unit-card__weapons"
+                      aria-label={`${entry.template.name} weapons`}
+                    >
+                      <span className="unit-card__weapons-title">Weapons</span>
+                      {entry.template.weapons.map((weapon, weaponIndex) => {
+                        const isRanged =
+                          weapon.range > DEFAULT_GAME_RULES.closeCombatRangeMeters;
+                        const attackProfile = isRanged
+                          ? `RNG ${weapon.range}m · HIT ${entry.template.rangeAttack}+`
+                          : `MELEE · ATK +${entry.template.meleeAttack}`;
+                        return (
+                          <div
+                            className="unit-card__weapon"
+                            key={`${weapon.name}-${weaponIndex}`}
+                            title={weapon.description}
+                            aria-label={`${weapon.name}, damage ${weapon.damage}, ${attackProfile}`}
+                          >
+                            <strong>{weapon.name}</strong>
+                            <span>DMG {weapon.damage}</span>
+                            <span>{attackProfile}</span>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                   <div className="unit-card__counter">
@@ -243,7 +263,9 @@ export default function ArmyWorkshop() {
                     <output>{count}</output>
                     <button
                       aria-label={`Add ${entry.template.name}`}
-                      disabled={unitCount >= MAX_UNITS_PER_ARMY}
+                      disabled={
+                        unitCount >= MAX_UNITS_PER_ARMY || count >= entry.maxPerArmy
+                      }
                       onClick={() => setCount(entry.id, count + 1)}
                     >
                       ＋

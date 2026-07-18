@@ -123,7 +123,7 @@ test("AI uses the configured larger movement budget per round", () => {
   expect(findPath).toHaveBeenCalledTimes(1);
 });
 
-test("a ranged final unit attacks and still closes instead of standing still", () => {
+test("a ranged unit attacks and holds its firing distance", () => {
   const world = fixtureWorld();
   const mover = miniature("ranged mover", [-30, 30]);
   mover.state.weapons = [{ name: "shoota", description: "", damage: 1, range: 15 }];
@@ -137,8 +137,41 @@ test("a ranged final unit attacks and still closes instead of standing still", (
   player1.playRound(game);
 
   expect(target.state.hitpoints).toBeLessThan(startingHitpoints);
-  expect(game.getDistanceAndBearing(mover, target).distance).toBeCloseTo(2, 6);
-  expect(game.getSnapshot().movementTraces).toHaveLength(1);
+  expect(game.getDistanceAndBearing(mover, target).distance).toBeCloseTo(10, 6);
+  expect(game.getSnapshot().movementTraces).toHaveLength(0);
+  expect(game.getSnapshot().combatTraces).toMatchObject([
+    { kind: "ranged", hit: true },
+  ]);
+});
+
+test("ranged units advance to firing distance, shoot, and use weapon damage", () => {
+  const world = fixtureWorld();
+  const shooter = miniature("shooter", [-40, 30]);
+  shooter.state.weapons = [
+    { name: "heavy shoota", description: "", damage: 5, range: 12 },
+  ];
+  shooter.state.rangeAttack = 3;
+  const target = miniature("target", [-20, 30]);
+  target.state.armour = 2;
+  const player1 = new SequentialAI(1, "one", [shooter], "red");
+  const player2 = new SequentialAI(2, "two", [target], "yellow");
+  const game = new Game(
+    [player1, player2],
+    world,
+    new GridNavigation(world),
+    () => 0.5
+  );
+
+  game.beginStep();
+  player1.playRound(game);
+
+  expect(game.getDistanceAndBearing(shooter, target).distance).toBeCloseTo(12, 6);
+  expect(target.state.hitpoints).toBe(3); // roll 4 + weapon 5 - armour 2
+  expect(game.getSnapshot().combatTraces[0]).toMatchObject({
+    kind: "ranged",
+    hit: true,
+    damage: 7,
+  });
 });
 
 test("an isolated unit makes a safe local move every round without relocation", () => {

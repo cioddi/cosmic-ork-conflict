@@ -1,10 +1,20 @@
 import { UNIT_CATALOG } from "../army/catalog";
 import { MiniatureType } from "../classes/Miniature";
+import { getUnitImageSrc } from "../unitAppearance";
 
 const FALLBACK_ICONS = [
-  { id: "unit-character", url: "assets/character.png" },
-  { id: "unit-vehicle", url: "assets/vehicle.png" },
-  { id: "unit-infantry", url: "assets/infantry.png" },
+  {
+    id: "unit-character",
+    url: getUnitImageSrc({ type: MiniatureType.CHARACTER }),
+  },
+  {
+    id: "unit-vehicle",
+    url: getUnitImageSrc({ type: MiniatureType.VEHICLE }),
+  },
+  {
+    id: "unit-infantry",
+    url: getUnitImageSrc({ type: MiniatureType.INFANTRY }),
+  },
 ] as const;
 
 const CATALOG_ICONS = UNIT_CATALOG.flatMap((entry) =>
@@ -14,22 +24,23 @@ const CATALOG_ICONS = UNIT_CATALOG.flatMap((entry) =>
 );
 
 export const UNIT_ICONS = [...FALLBACK_ICONS, ...CATALOG_ICONS].filter(
-  (icon, index, icons) => icons.findIndex((candidate) => candidate.id === icon.id) === index
+  (icon, index, icons) =>
+    icons.findIndex((candidate) => candidate.url === icon.url) === index
 );
 
-const CATALOG_ICON_BY_IMAGE = new Map(
-  CATALOG_ICONS.map((icon) => [icon.url, icon.id])
+const ICON_ID_BY_IMAGE = new Map(
+  UNIT_ICONS.map((icon) => [icon.url, icon.id])
 );
 
 export function getUnitIconId(
   image: string | undefined,
   type: MiniatureType
 ): string {
-  if (image) {
-    const catalogIcon = CATALOG_ICON_BY_IMAGE.get(image);
-    if (catalogIcon) return catalogIcon;
-  }
-  if (type === MiniatureType.CHARACTER) return "unit-character";
-  if (type === MiniatureType.VEHICLE) return "unit-vehicle";
-  return "unit-infantry";
+  const resolvedImage = getUnitImageSrc({ image, type });
+  const fallbackImage = getUnitImageSrc({ type });
+  return (
+    ICON_ID_BY_IMAGE.get(resolvedImage) ??
+    ICON_ID_BY_IMAGE.get(fallbackImage) ??
+    "unit-infantry"
+  );
 }

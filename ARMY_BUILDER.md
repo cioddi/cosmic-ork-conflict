@@ -12,6 +12,12 @@ unit's hit points, armour, speed, attacks, weapons, range, and type by
 covered by unit tests. Keeping the formula explicit makes balance changes
 reviewable and prevents remote data changes from silently altering saved armies.
 
+The roster contains twelve choices spanning cheap Scrapling Rabble, core
+infantry, ranged specialists, bikes, artillery, a heavy walker, and named
+characters. Named characters have stronger profiles and are limited to one of
+each per army. Rivetback Riders are fast shock troops with seven hit points rather
+than general-purpose tanks.
+
 An army records catalogue IDs and counts rather than full unit objects. It may
 have either a numeric point limit or `null` for unrestricted building. Every
 army still has a calculated point total, allowing an unrestricted army to be
@@ -45,6 +51,11 @@ Starting a battle expands catalogue IDs into fresh `Miniature` instances and
 uses the existing collision-safe spawn service. Returning to the workshop stops
 the active simulation and allows another matchup without reloading terrain.
 
+Ranged units advance to their preferred weapon range and hold there. Both melee
+and ranged damage include the selected weapon's damage value. Each combat event
+also emits a short-lived render trace used for projectile streaks, melee slashes,
+and impact bursts on successful hits.
+
 ## Rendering and dependencies
 
 The workshop does not mount the map renderer. Terrain preparation happens in
@@ -54,6 +65,6 @@ MapLibre through a small local React context instead of the former third-party
 provider, whose bundled React version could crash startup.
 
 Unit images are registered once and rendered by one shared symbol layer. Each
-catalogue image has a stable icon ID, so special sprites such as Orc Biker stay
+catalogue image has a stable icon ID, so special sprites such as Rivetback Rider stay
 distinct from generic vehicle and character fallbacks without adding a layer
 per unit. No package was added for this feature.

@@ -5,10 +5,10 @@ import {
   MapLayerMouseEvent,
 } from "maplibre-gl";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { MiniatureOptions, MiniatureType } from "./classes/Miniature";
 import { useGame } from "./GameContext";
 import { useAnimatedGameGeoJSON } from "./view/useAnimatedGameGeoJSON";
 import SharedUnitIconLayer from "./view/SharedUnitIconLayer";
+import CombatEffects from "./view/CombatEffects";
 import { useMapLibreMap } from "./view/MapLibreView";
 
 const GAME_UNITS_SOURCE_ID = "game-units";
@@ -45,24 +45,6 @@ const UNIT_ICON_SIZE = [
   24,
   ["^", 2, 8],
 ] as unknown as DataDrivenPropertyValueSpecification<number>;
-
-export const getImageSrcFromProps = (
-  props: Omit<MiniatureOptions, "position">
-) => {
-  if (props.image) return props.image;
-
-  switch (props.type) {
-    case MiniatureType.CHARACTER:
-      return "assets/character.png";
-    case MiniatureType.ROBOT:
-      return "assets/infantry.png";
-    case MiniatureType.VEHICLE:
-      return "assets/vehicle.png";
-    case MiniatureType.INFANTRY:
-    default:
-      return "assets/infantry.png";
-  }
-};
 
 export default function GameDataLayers() {
   const game = useGame();
@@ -253,9 +235,12 @@ export default function GameDataLayers() {
   }, [setViewReady, viewCanRender]);
 
   return (
-    <SharedUnitIconLayer
-      enabled={Boolean(renderedGeojson)}
-      onReady={handleIconsReady}
-    />
+    <>
+      <SharedUnitIconLayer
+        enabled={Boolean(renderedGeojson)}
+        onReady={handleIconsReady}
+      />
+      <CombatEffects />
+    </>
   );
 }

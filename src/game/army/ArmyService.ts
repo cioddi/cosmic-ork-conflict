@@ -63,13 +63,19 @@ export function setArmyUnitCount(
   requestedCount: number,
   now = new Date()
 ): ArmyDefinition {
-  if (!UNIT_CATALOG_BY_ID.has(unitId) || !Number.isFinite(requestedCount)) return army;
+  const entry = UNIT_CATALOG_BY_ID.get(unitId);
+  if (!entry || !Number.isFinite(requestedCount)) return army;
   const currentCount = army.unitCounts[unitId] ?? 0;
   const otherUnitCount = getArmyUnitCount(army) - currentCount;
   const count = Math.max(
     0,
-    Math.min(Math.floor(requestedCount), MAX_UNITS_PER_ARMY - otherUnitCount)
+    Math.min(
+      Math.floor(requestedCount),
+      entry.maxPerArmy,
+      MAX_UNITS_PER_ARMY - otherUnitCount
+    )
   );
+  if (count === currentCount) return army;
   const unitCounts = { ...army.unitCounts };
   if (count === 0) delete unitCounts[unitId];
   else unitCounts[unitId] = count;
@@ -142,7 +148,9 @@ export function generateRandomArmy(
     if (total >= target - tolerance) break;
     const remaining = target - total;
     const candidates = UNIT_CATALOG.filter(
-      (entry) => entry.points <= remaining + tolerance
+      (entry) =>
+        entry.points <= remaining + tolerance &&
+        (army.unitCounts[entry.id] ?? 0) < entry.maxPerArmy
     );
     if (candidates.length === 0) break;
     const randomIndex = Math.max(
@@ -179,7 +187,8 @@ export function isUsableArmy(army: ArmyDefinition): boolean {
       ([unitId, unitCount]) =>
         UNIT_CATALOG_BY_ID.has(unitId) &&
         Number.isInteger(unitCount) &&
-        unitCount > 0
+        unitCount > 0 &&
+        unitCount <= UNIT_CATALOG_BY_ID.get(unitId)!.maxPerArmy
     ) &&
     count > 0 &&
     count <= MAX_UNITS_PER_ARMY &&
@@ -231,7 +240,11 @@ function normalizeArmy(army: ArmyDefinition): ArmyDefinition {
   for (const entry of UNIT_CATALOG) {
     const count = Math.max(
       0,
-      Math.min(remaining, Math.floor(army.unitCounts[entry.id] ?? 0))
+      Math.min(
+        remaining,
+        entry.maxPerArmy,
+        Math.floor(army.unitCounts[entry.id] ?? 0)
+      )
     );
     if (count > 0) unitCounts[entry.id] = count;
     remaining -= count;

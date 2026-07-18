@@ -3,7 +3,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Avatar from "@mui/material/Avatar";
-import { getImageSrcFromProps } from "../game/GameDataLayers";
+import { getUnitImageSrc } from "../game/unitAppearance";
 import { MiniatureGeoJsonFeature } from "../game/view/MapLibreSnapshotAdapter";
 import { useGame } from "../game/GameContext";
 
@@ -57,7 +57,7 @@ export default function FolderList(props: {
         >
           <img
             style={{ width: "100%" }}
-            src={getImageSrcFromProps(props.miniature.properties)}
+            src={getUnitImageSrc(props.miniature.properties)}
             alt={props.miniature.properties.description}
           />
         </Avatar>

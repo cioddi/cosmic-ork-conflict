@@ -9,9 +9,12 @@ export type UnitTemplate = Omit<
 export interface UnitCatalogEntry {
   id: string;
   points: number;
+  maxPerArmy: number;
   template: UnitTemplate;
 }
 
+// These IDs are persistence keys, not player-facing unit names. Several retain
+// legacy wording so armies saved before the original-name pass keep loading.
 const UNIT_IDS = [
   "brog-ironfist",
   "goblin-snikkitz",
@@ -20,6 +23,11 @@ const UNIT_IDS = [
   "skabrot-the-terrible",
   "gorgutz-the-invader",
   "krog-the-despoiler",
+  "ork-boy",
+  "shoota-boy",
+  "burna-boy",
+  "mek-gun",
+  "deff-dread",
 ] as const;
 
 /**
@@ -56,6 +64,8 @@ export const UNIT_CATALOG: readonly UnitCatalogEntry[] = Object.freeze(
   orcUnits.map((template, index) => ({
     id: UNIT_IDS[index] ?? `unit-${index}`,
     points: calculateUnitPointCost(template),
+    maxPerArmy:
+      template.type === MiniatureType.CHARACTER ? 1 : Number.POSITIVE_INFINITY,
     template,
   }))
 );

@@ -9,7 +9,8 @@ import {
   saveArmyCollection,
   setArmyUnitCount,
 } from "./ArmyService";
-import { UNIT_CATALOG, calculateUnitPointCost } from "./catalog";
+import { UNIT_CATALOG, UNIT_CATALOG_BY_ID, calculateUnitPointCost } from "./catalog";
+import { MiniatureType } from "../classes/Miniature";
 
 test("point costs are deterministic and constrained armies reject overspending", () => {
   const entry = UNIT_CATALOG[0];
@@ -69,4 +70,28 @@ test("invalid counts and unknown catalogue entries cannot enter a battle", () =>
       setItem: () => undefined,
     })
   ).toEqual([]);
+});
+
+test("the expanded roster preserves the intended balance anchors", () => {
+  const goblins = UNIT_CATALOG_BY_ID.get("goblin-snikkitz")!;
+  const biker = UNIT_CATALOG_BY_ID.get("orc-biker")!;
+  const orkBoy = UNIT_CATALOG_BY_ID.get("ork-boy")!;
+  const characters = UNIT_CATALOG.filter(
+    (entry) => entry.template.type === MiniatureType.CHARACTER
+  );
+
+  expect(UNIT_CATALOG).toHaveLength(12);
+  expect(goblins.template.name).toBe("Scrapling Rabble");
+  expect(goblins.points).toBeLessThan(orkBoy.points);
+  expect(goblins.points).toBeLessThanOrEqual(40);
+  expect(biker.template.hitpoints).toBe(7);
+  expect(characters.every((entry) => entry.template.hitpoints >= 20)).toBe(true);
+  expect(characters.every((entry) => entry.points > orkBoy.points)).toBe(true);
+  expect(characters.every((entry) => entry.maxPerArmy === 1)).toBe(true);
+  const heroArmy = setArmyUnitCount(
+    createArmy("Hero", new Date(0), "hero"),
+    "brog-ironfist",
+    10
+  );
+  expect(heroArmy.unitCounts["brog-ironfist"]).toBe(1);
 });

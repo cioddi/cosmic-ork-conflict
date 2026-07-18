@@ -183,9 +183,47 @@
 .unit-card__body { min-width: 0; padding: 9px; }
 .unit-card__heading { display: flex; justify-content: space-between; gap: 7px; }
 .unit-card__heading h3 { color: #edf9df; font-size: 14px; }
+.unit-card__heading h3 small {
+  display: inline-block;
+  margin-left: 6px;
+  color: #f0aa5a;
+  font: 700 8px ui-monospace, monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
 .unit-card__heading strong { color: var(--ork-green); font: 700 12px ui-monospace, monospace; white-space: nowrap; }
 .unit-card__body p { display: -webkit-box; overflow: hidden; margin-top: 4px; color: #929d8c; font-size: 11px; line-height: 1.25; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .unit-card__stats { display: flex; gap: 8px; margin-top: 8px; color: #c6d0be; font: 700 10px ui-monospace, monospace; }
+.unit-card__weapons {
+  display: grid;
+  gap: 4px;
+  margin-top: 8px;
+  padding-top: 7px;
+  border-top: 1px solid #354132;
+}
+.unit-card__weapons-title {
+  color: #84917e;
+  font: 700 8px ui-monospace, monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.unit-card__weapon {
+  display: grid;
+  grid-template-columns: minmax(72px, 1fr) auto auto;
+  gap: 6px;
+  align-items: center;
+  color: #aeb9a7;
+  font: 700 9px ui-monospace, monospace;
+}
+.unit-card__weapon strong {
+  overflow: hidden;
+  color: #e2eadb;
+  font: inherit;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.unit-card__weapon span { white-space: nowrap; }
+.unit-card__weapon span:first-of-type { color: #f0aa5a; }
 .unit-card__counter { display: grid; grid-template-rows: 1fr 28px 1fr; width: 35px; border-left: 1px solid #354132; }
 .unit-card__counter button { border: 0; border-radius: 0; background: #293327; }
 .unit-card__counter output { display: grid; place-items: center; color: var(--ork-lime); font-weight: 800; background: #10150f; }
@@ -237,5 +275,7 @@
   .unit-catalog { grid-template-columns: 1fr; }
   .unit-card { grid-template-columns: 62px 1fr auto; }
   .unit-card > img { width: 62px; }
+  .unit-card__weapon { grid-template-columns: 1fr auto; }
+  .unit-card__weapon span:last-child { grid-column: 1 / -1; }
   .army-workshop-return { top: 90px; right: 10px; }
 }
